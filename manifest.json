@@ -1,0 +1,20 @@
+{
+  "name": "GuiaScan — Logística",
+  "short_name": "GuiaScan",
+  "description": "Escáner de guías de envío para operaciones logísticas",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0F1E",
+  "theme_color": "#0A0F1E",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "utilities", "productivity"],
+  "lang": "es"
+}
