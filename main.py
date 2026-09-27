@@ -200,24 +200,24 @@ def importar_masivo():
         {"sku": "BOR-VFAT", "nombre_oficial": "Borrego Virgen de Fatima", "categoria": "Borregos", "cantidad": 20},
         {"sku": "BOR-SMIG", "nombre_oficial": "Borrego San Miguel Arcangel", "categoria": "Borregos", "cantidad": 3},
 
-        # --- CUELLO CAMISERO, POLAR & BRAHAM ---
-        {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
-        {"sku": "CUE-CAM-BEI", "nombre_oficial": "Cuello Camisero - Beige", "categoria": "Insumos", "cantidad": 1},
+        # --- POLAR ---
         {"sku": "POL-DAM-VIN", "nombre_oficial": "Polar para Dama - Vinotinto", "categoria": "Polar", "cantidad": 12},
         {"sku": "POL-DAM-MAR", "nombre_oficial": "Polar para Dama - Marfil", "categoria": "Polar", "cantidad": 10},
         {"sku": "POL-DAM-CAF", "nombre_oficial": "Polar para Dama - Café", "categoria": "Polar", "cantidad": 5},
+
+        # --- BRAHAM ---
         {"sku": "BRAH-RAI-BLA", "nombre_oficial": "Braham Bordado - Blanco", "categoria": "Braham", "cantidad": 6},
         {"sku": "BRAH-RAI-NEG", "nombre_oficial": "Braham Bordado - Negro", "categoria": "Braham", "cantidad": 10},
         {"sku": "BRAH-RAI-CAF", "nombre_oficial": "Braham Bordado - Café", "categoria": "Braham", "cantidad": 1},
 
-        # --- PVC (Con el de 1.5M incluido) ---
+        # --- PVC (Incluyendo Rollos PVC) ---
         {"sku": "PVC-1M", "nombre_oficial": "PVC 1 M", "categoria": "PVC", "cantidad": 112},
         {"sku": "PVC-1.5M", "nombre_oficial": "PVC 1.5 M", "categoria": "PVC", "cantidad": 0},
         {"sku": "PVC-2M", "nombre_oficial": "PVC 2 M", "categoria": "PVC", "cantidad": 2},
         {"sku": "PVC-ROL-30M", "nombre_oficial": "Rollos PVC 30 M", "categoria": "PVC", "cantidad": 0},
         {"sku": "PVC-ROL-40M", "nombre_oficial": "Rollos PVC 40 M", "categoria": "PVC", "cantidad": 12},
 
-        # --- MANTELES ---
+        # --- MANTELES (Incluyendo Rollos Manteles) ---
         {"sku": "MAN6-ORO", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Oro", "categoria": "Manteles", "cantidad": 7},
         {"sku": "MAN6-ENC", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Encanto", "categoria": "Manteles", "cantidad": 3},
         {"sku": "MAN6-IMP", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Imperial", "categoria": "Manteles", "cantidad": 3},
@@ -232,7 +232,9 @@ def importar_masivo():
         {"sku": "MAN-ROL-ROS", "nombre_oficial": "Rollos Manteles Rosa", "categoria": "Manteles", "cantidad": 3},
         {"sku": "MAN-ROL-ENC", "nombre_oficial": "Rollos Manteles Encanto", "categoria": "Manteles", "cantidad": 4},
 
-        # --- TENDEDEROS, KIT E INSUMOS ---
+        # --- INSUMOS (Cuellos, Tendederos, Kit, Rollos Impresión, Ribbon, Cintas, Stretch) ---
+        {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
+        {"sku": "CUE-CAM-BEI", "nombre_oficial": "Cuello Camisero - Beige", "categoria": "Insumos", "cantidad": 1},
         {"sku": "TEN-GEN", "nombre_oficial": "Tendederos", "categoria": "Insumos", "cantidad": 128},
         {"sku": "KIT-REP", "nombre_oficial": "Kit de Reparación", "categoria": "Insumos", "cantidad": 13},
         {"sku": "INS-ROL-IMP", "nombre_oficial": "Rollos de impresion (x500)", "categoria": "Insumos", "cantidad": 6},
@@ -240,6 +242,8 @@ def importar_masivo():
         {"sku": "INS-CIN", "nombre_oficial": "Cintas", "categoria": "Insumos", "cantidad": 5},
         {"sku": "INS-STR-GRD", "nombre_oficial": "Stretch grandes (45cm)", "categoria": "Insumos", "cantidad": 7},
         {"sku": "INS-STR-PEQ", "nombre_oficial": "Stretch pequeños (30cm)", "categoria": "Insumos", "cantidad": 3},
+
+        # --- EMPAQUES (Bolsas) ---
         {"sku": "INS-BOL-GRD", "nombre_oficial": "Bolsas grandes 18x24", "categoria": "Empaques", "cantidad": 3},
         {"sku": "INS-BOL-MED", "nombre_oficial": "Bolsas medianas 14*18", "categoria": "Empaques", "cantidad": 9},
         {"sku": "INS-BOL-PEQ", "nombre_oficial": "Bolsas pequeñas 10*14", "categoria": "Empaques", "cantidad": 5}
@@ -252,4 +256,4 @@ def importar_masivo():
             upsert=True
         )
         
-    return {"ok": True, "mensaje": "¡PVC de 1.5M agregado e inventario actualizado!"}
+    return {"ok": True, "mensaje": "¡Inventario y categorías sincronizados correctamente con los filtros!"}
