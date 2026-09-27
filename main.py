@@ -116,6 +116,10 @@ def entrada_lote(data: LoteEntrada):
 def escanear_salida(data: EscaneoSalida):
     # 1. Limpieza Inteligente del nombre que viene del PDF
     nombre_sucio = data.nombre_producto
+    import re
+    # Extrae el número si la guía trae un "X 2", "x3", etc.
+    match_cant = re.search(r'[xX]\s*(\d+)', nombre_sucio)
+    cantidad_a_descontar = int(match_cant.group(1)) if match_cant else 1
     nombre_limpio = nombre_sucio.split("Notas:")[0].split("Nro:")[0].split(" X ")[0].strip()
     
     # Extraemos solo las primeras palabras clave por si está escrito distinto
@@ -132,12 +136,12 @@ def escanear_salida(data: EscaneoSalida):
         raise HTTPException(status_code=400, detail=f"No se halló en la nube: '{nombre_limpio}'")
         
     # 3. Descontar Stock
-    nuevo_stock = producto["cantidad"] - data.cantidad_requerida
+    nuevo_stock = producto["cantidad"] - cantidad_a_descontar
     inventario_col.update_one({"_id": producto["_id"]}, {"$set": {"cantidad": nuevo_stock}})
     
     return {
         "ok": True, 
-        "mensaje": f"Se descontó 1 de {producto['nombre_oficial']} (Quedan: {nuevo_stock})"
+        "mensaje": f"Se descontó {cantidad_a_descontar} de {producto['nombre_oficial']} (Quedan: {nuevo_stock})"
     }
 @app.get("/api/guias")
 def obtener_guias():
