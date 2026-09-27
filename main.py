@@ -176,7 +176,6 @@ def importar_masivo():
         {"sku": "ABR-GUAD-01", "nombre_oficial": "Abrigo Virgen Guadalupe", "categoria": "Abrigos", "cantidad": 15},
         {"sku": "ABR-VCAR-NUE", "nombre_oficial": "Abrigo Virgen del Carmen Nuevo", "categoria": "Abrigos", "cantidad": 38},
         {"sku": "ABR-ROSA-01", "nombre_oficial": "Abrigo Rosa Mistica", "categoria": "Abrigos", "cantidad": 1},
-        {"sku": "ABR-MANTO-JES", "nombre_oficial": "Manto sagrado corazón de Jesús", "categoria": "Abrigos", "cantidad": 1},
         {"sku": "ABR-BRAH-UNI", "nombre_oficial": "Abrigo Brahmán Único", "categoria": "Abrigos", "cantidad": 8},
         {"sku": "ABR-TEJ-BLA", "nombre_oficial": "Abrigo Tejido - Blanco", "categoria": "Abrigos", "cantidad": 6},
         {"sku": "ABR-TEJ-NEG", "nombre_oficial": "Abrigo Tejido - Negro", "categoria": "Abrigos", "cantidad": 16},
@@ -188,6 +187,16 @@ def importar_masivo():
         {"sku": "ABR-MILAGRO", "nombre_oficial": "Abrigo Virgen de la Milagrosa", "categoria": "Abrigos", "cantidad": 81},
         {"sku": "ABR-ENC-BLA", "nombre_oficial": "Abrigo Encanto - Blanco", "categoria": "Abrigos", "cantidad": 1},
         {"sku": "ABR-ENC-ROS", "nombre_oficial": "Abrigo Encanto - Rosado", "categoria": "Abrigos", "cantidad": 1},
+
+        # --- MANTOS (Categoría Mantos corregida) ---
+        {"sku": "ABR-MANTO-JES", "nombre_oficial": "Manto sagrado corazón de Jesús", "categoria": "Mantos", "cantidad": 1},
+        {"sku": "MNT-MTO-CHAL", "nombre_oficial": "Manto Tipo Chal", "categoria": "Mantos", "cantidad": 1},
+        {"sku": "MNT-EDEN", "nombre_oficial": "Manto Edn", "categoria": "Mantos", "cantidad": 5},
+        {"sku": "MNT-MAD-CEL", "nombre_oficial": "Manto Madre Celestial", "categoria": "Mantos", "cantidad": 2},
+        {"sku": "MNT-GUAD-BOR", "nombre_oficial": "Manto Guadalupe Bordado", "categoria": "Mantos", "cantidad": 4},
+        {"sku": "BOR-VCAR", "nombre_oficial": "Borrego Virgen del Carmen", "categoria": "Mantos", "cantidad": 12},
+        {"sku": "BOR-VFAT", "nombre_oficial": "Borrego Virgen de Fatima", "categoria": "Mantos", "cantidad": 20},
+        {"sku": "BOR-SMIG", "nombre_oficial": "Borrego San Miguel Arcangel", "categoria": "Mantos", "cantidad": 3},
 
         # --- CUELLO CAMISERO & POLAR & BRAHAM ---
         {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
@@ -202,35 +211,27 @@ def importar_masivo():
         # --- PVC ---
         {"sku": "PVC-1M", "nombre_oficial": "PVC 1 M", "categoria": "PVC", "cantidad": 112},
         {"sku": "PVC-2M", "nombre_oficial": "PVC 2 M", "categoria": "PVC", "cantidad": 2},
+        {"sku": "PVC-ROL-30M", "nombre_oficial": "Rollos PVC 30 M", "categoria": "PVC", "cantidad": 0},
+        {"sku": "PVC-ROL-40M", "nombre_oficial": "Rollos PVC 40 M", "categoria": "PVC", "cantidad": 12},
 
-        # --- MANTELES 2,2 - 6 PUESTOS ---
+        # --- MANTELES ---
         {"sku": "MAN6-ORO", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Oro", "categoria": "Manteles", "cantidad": 7},
         {"sku": "MAN6-ENC", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Encanto", "categoria": "Manteles", "cantidad": 3},
         {"sku": "MAN6-IMP", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Imperial", "categoria": "Manteles", "cantidad": 3},
         {"sku": "MAN6-PLA", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Plateado", "categoria": "Manteles", "cantidad": 4},
         {"sku": "MAN6-FLO", "nombre_oficial": "Manteles 2,2 - 6 Puestos - Florenza", "categoria": "Manteles", "cantidad": 6},
-
-        # --- MANTELES 1,8 - 4 PUESTOS ---
         {"sku": "MAN4-ORO", "nombre_oficial": "Manteles 1,8 - 4 Puestos - Oro", "categoria": "Manteles", "cantidad": 16},
         {"sku": "MAN4-ROS", "nombre_oficial": "Manteles 1,8 - 4 Puestos - Rosa", "categoria": "Manteles", "cantidad": 3},
         {"sku": "MAN4-ENC", "nombre_oficial": "Manteles 1,8 - 4 Puestos - Encanto", "categoria": "Manteles", "cantidad": 7},
         {"sku": "MAN4-PLA", "nombre_oficial": "Manteles 1,8 - 4 Puestos - Plateado", "categoria": "Manteles", "cantidad": 4},
         {"sku": "MAN4-FLO", "nombre_oficial": "Manteles 1,8 - 4 Puestos - Florenza", "categoria": "Manteles", "cantidad": 2},
+        {"sku": "MAN-ROL-ORO", "nombre_oficial": "Rollos Manteles Oro", "categoria": "Manteles", "cantidad": 2},
+        {"sku": "MAN-ROL-ROS", "nombre_oficial": "Rollos Manteles Rosa", "categoria": "Manteles", "cantidad": 3},
+        {"sku": "MAN-ROL-ENC", "nombre_oficial": "Rollos Manteles Encanto", "categoria": "Manteles", "cantidad": 4},
 
-        # --- MANTOS Y BORREGOS ---
-        {"sku": "MNT-MTO-CHAL", "nombre_oficial": "Manto Tipo Chal", "categoria": "Manteles", "cantidad": 1},
-        {"sku": "MNT-EDEN", "nombre_oficial": "Manto Edn", "categoria": "Manteles", "cantidad": 5},
-        {"sku": "BOR-VCAR", "nombre_oficial": "Borrego Virgen del Carmen", "categoria": "Borregos", "cantidad": 12},
-        {"sku": "BOR-VFAT", "nombre_oficial": "Borrego Virgen de Fatima", "categoria": "Borregos", "cantidad": 20},
-        {"sku": "BOR-SMIG", "nombre_oficial": "Borrego San Miguel Arcangel", "categoria": "Borregos", "cantidad": 3},
-        {"sku": "MNT-MAD-CEL", "nombre_oficial": "Manto Madre Celestial", "categoria": "Manteles", "cantidad": 2},
-        {"sku": "MNT-GUAD-BOR", "nombre_oficial": "Manto Guadalupe Bordado", "categoria": "Manteles", "cantidad": 4},
-
-        # --- TENDEDEROS Y KIT ---
+        # --- TENDEDEROS, KIT E INSUMOS ---
         {"sku": "TEN-GEN", "nombre_oficial": "Tendederos", "categoria": "Insumos", "cantidad": 128},
         {"sku": "KIT-REP", "nombre_oficial": "Kit de Reparación", "categoria": "Insumos", "cantidad": 13},
-
-        # --- INSUMOS GENERALES ---
         {"sku": "INS-ROL-IMP", "nombre_oficial": "Rollos de impresion (x500)", "categoria": "Insumos", "cantidad": 6},
         {"sku": "INS-RIB", "nombre_oficial": "Ribon", "categoria": "Insumos", "cantidad": 5},
         {"sku": "INS-CIN", "nombre_oficial": "Cintas", "categoria": "Insumos", "cantidad": 5},
@@ -238,22 +239,15 @@ def importar_masivo():
         {"sku": "INS-STR-PEQ", "nombre_oficial": "Stretch pequeños (30cm)", "categoria": "Insumos", "cantidad": 3},
         {"sku": "INS-BOL-GRD", "nombre_oficial": "Bolsas grandes 18x24", "categoria": "Empaques", "cantidad": 3},
         {"sku": "INS-BOL-MED", "nombre_oficial": "Bolsas medianas 14*18", "categoria": "Empaques", "cantidad": 9},
-        {"sku": "INS-BOL-PEQ", "nombre_oficial": "Bolsas pequeñas 10*14", "categoria": "Empaques", "cantidad": 5},
-
-        # --- ROLLOS PVC Y MANTELES ---
-        {"sku": "PVC-ROL-30M", "nombre_oficial": "Rollos PVC 30 M", "categoria": "PVC", "cantidad": 0},
-        {"sku": "PVC-ROL-40M", "nombre_oficial": "Rollos PVC 40 M", "categoria": "PVC", "cantidad": 12},
-        {"sku": "MAN-ROL-ORO", "nombre_oficial": "Rollos Manteles Oro", "categoria": "Manteles", "cantidad": 2},
-        {"sku": "MAN-ROL-ROS", "nombre_oficial": "Rollos Manteles Rosa", "categoria": "Manteles", "cantidad": 3},
-        {"sku": "MAN-ROL-ENC", "nombre_oficial": "Rollos Manteles Encanto", "categoria": "Manteles", "cantidad": 4}
+        {"sku": "INS-BOL-PEQ", "nombre_oficial": "Bolsas pequeñas 10*14", "categoria": "Empaques", "cantidad": 5}
     ]
     
-    # Evita duplicados insertando solo si no existen o cargandolos directo
+    # Esto actualiza o inserta los productos asegurando que la categoría quede correcta
     for p in productos_iniciales:
         inventario_col.update_one(
             {"sku": p["sku"]}, 
-            {"$setOnInsert": p}, 
+            {"$set": {"categoria": p["categoria"], "nombre_oficial": p["nombre_oficial"]}}, 
             upsert=True
         )
         
-    return {"ok": True, "mensaje": f"¡Se importaron {len(productos_iniciales)} productos correctamente a la nube!"}
+    return {"ok": True, "mensaje": "¡Categorías y productos sincronizados perfectamente en la nube!"}
