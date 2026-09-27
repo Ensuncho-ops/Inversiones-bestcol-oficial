@@ -1201,8 +1201,27 @@ function clearAll() {
 }
 
 // ═══ PERSISTENCE ═══
-function saveData() { try{localStorage.setItem('gs6',JSON.stringify(guias));}catch(e){} }
-function loadData() { try{var d=localStorage.getItem('gs6');if(d)guias=JSON.parse(d);}catch(e){} }
+// ═══ PERSISTENCE ═══
+function saveData() { 
+  try { localStorage.setItem('gs6', JSON.stringify(guias)); } catch(e) {} 
+  fetch(API_URL + "/api/guias", {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(guias)
+  }).catch(e => {});
+}
+
+function loadData() { 
+  try { var d = localStorage.getItem('gs6'); if (d) guias = JSON.parse(d); } catch(e) {} 
+  fetch(API_URL + "/api/guias")
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok && Object.keys(data.guias).length > 0) {
+        guias = data.guias;
+        localStorage.setItem('gs6', JSON.stringify(guias));
+        renderList(); updateStats(); updateProgress();
+      }
+    }).catch(e => {});
+}
 function savePrefs() {
   prefs.sound = document.getElementById('tSound').checked;
   prefs.vibe = document.getElementById('tVibe').checked;
