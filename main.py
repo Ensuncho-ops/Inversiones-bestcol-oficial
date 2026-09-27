@@ -20,7 +20,7 @@ app.add_middleware(
 # Por ahora usa una conexión local si tienes MongoDB instalado, 
 # o puedes crear tu cluster en MongoDB Atlas y pegar el enlace aquí.
 # ==============================================================
-MONGO_URI = "mongodb+srv://felipensuncho2002_db_user:Felipe427.@inversionesbestcol.fix2aui.mongodb.net/?appName=inversionesbestcol"
+MONGO_URI = "mongodb+srv://felipensuncho2002_db_user:Felipe427@inversionesbestcol.fix2aui.mongodb.net/?appName=inversionesbestcol"
 client = MongoClient(MONGO_URI)
 db = client["wms_bestcol"]
 inventario_col = db["inventario"]
