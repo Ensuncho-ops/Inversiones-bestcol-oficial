@@ -114,13 +114,17 @@ def entrada_lote(data: LoteEntrada):
 
 @app.post("/api/escanear_salida")
 def escanear_salida(data: EscaneoSalida):
-    # 1. Limpieza Inteligente del nombre que viene del PDF
+ 
+    # 1. Limpieza Inteligente y extracción de cantidad
     nombre_sucio = data.nombre_producto
+    
     import re
-    # Extrae el número si la guía trae un "X 2", "x3", etc.
+    # Buscamos el multiplicador (ej. "X 2", "x3") en todo el texto original
     match_cant = re.search(r'[xX]\s*(\d+)', nombre_sucio)
     cantidad_a_descontar = int(match_cant.group(1)) if match_cant else 1
-    nombre_limpio = nombre_sucio.split("Notas:")[0].split("Nro:")[0].split(" X ")[0].strip()
+
+    # Limpiamos el nombre para buscar el producto en la base de datos
+    nombre_limpio = nombre_sucio.split("Notas:")[0].split("Nro:")[0].split("ID")[0].split("X")[0].strip()
     
     # Extraemos solo las primeras palabras clave por si está escrito distinto
     palabras = nombre_limpio.split()[:3] 
