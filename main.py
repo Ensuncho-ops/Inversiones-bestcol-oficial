@@ -187,6 +187,8 @@ def importar_masivo():
         {"sku": "ABR-MILAGRO", "nombre_oficial": "Abrigo Virgen de la Milagrosa", "categoria": "Abrigos", "cantidad": 81},
         {"sku": "ABR-ENC-BLA", "nombre_oficial": "Abrigo Encanto - Blanco", "categoria": "Abrigos", "cantidad": 1},
         {"sku": "ABR-ENC-ROS", "nombre_oficial": "Abrigo Encanto - Rosado", "categoria": "Abrigos", "cantidad": 1},
+        {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
+        {"sku": "CUE-CAM-BEI", "nombre_oficial": "Cuello Camisero - Beige", "categoria": "Insumos", "cantidad": 1},
 
         # --- MANTOS ---
         {"sku": "ABR-MANTO-JES", "nombre_oficial": "Manto sagrado corazón de Jesús", "categoria": "Mantos", "cantidad": 1},
@@ -233,8 +235,7 @@ def importar_masivo():
         {"sku": "MAN-ROL-ENC", "nombre_oficial": "Rollos Manteles Encanto", "categoria": "Manteles", "cantidad": 4},
 
         # --- INSUMOS (Cuellos, Tendederos, Kit, Rollos Impresión, Ribbon, Cintas, Stretch) ---
-        {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
-        {"sku": "CUE-CAM-BEI", "nombre_oficial": "Cuello Camisero - Beige", "categoria": "Insumos", "cantidad": 1},
+        
         {"sku": "TEN-GEN", "nombre_oficial": "Tendederos", "categoria": "Insumos", "cantidad": 128},
         {"sku": "KIT-REP", "nombre_oficial": "Kit de Reparación", "categoria": "Insumos", "cantidad": 13},
         {"sku": "INS-ROL-IMP", "nombre_oficial": "Rollos de impresion (x500)", "categoria": "Insumos", "cantidad": 6},
