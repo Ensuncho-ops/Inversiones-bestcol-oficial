@@ -139,7 +139,7 @@ def escanear_salida(data: EscaneoSalida):
         "ok": True, 
         "mensaje": f"Se descontó 1 de {producto['nombre_oficial']} (Quedan: {nuevo_stock})"
     }
-    @app.get("/api/guias")
+@app.get("/api/guias")
 def obtener_guias():
     try:
         # Busca el documento de guías en Mongo
