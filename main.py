@@ -188,17 +188,19 @@ def importar_masivo():
         {"sku": "ABR-ENC-BLA", "nombre_oficial": "Abrigo Encanto - Blanco", "categoria": "Abrigos", "cantidad": 1},
         {"sku": "ABR-ENC-ROS", "nombre_oficial": "Abrigo Encanto - Rosado", "categoria": "Abrigos", "cantidad": 1},
 
-        # --- MANTOS (Categoría Mantos corregida) ---
+        # --- MANTOS ---
         {"sku": "ABR-MANTO-JES", "nombre_oficial": "Manto sagrado corazón de Jesús", "categoria": "Mantos", "cantidad": 1},
         {"sku": "MNT-MTO-CHAL", "nombre_oficial": "Manto Tipo Chal", "categoria": "Mantos", "cantidad": 1},
         {"sku": "MNT-EDEN", "nombre_oficial": "Manto Edn", "categoria": "Mantos", "cantidad": 5},
         {"sku": "MNT-MAD-CEL", "nombre_oficial": "Manto Madre Celestial", "categoria": "Mantos", "cantidad": 2},
         {"sku": "MNT-GUAD-BOR", "nombre_oficial": "Manto Guadalupe Bordado", "categoria": "Mantos", "cantidad": 4},
-        {"sku": "BOR-VCAR", "nombre_oficial": "Borrego Virgen del Carmen", "categoria": "Mantos", "cantidad": 12},
-        {"sku": "BOR-VFAT", "nombre_oficial": "Borrego Virgen de Fatima", "categoria": "Mantos", "cantidad": 20},
-        {"sku": "BOR-SMIG", "nombre_oficial": "Borrego San Miguel Arcangel", "categoria": "Mantos", "cantidad": 3},
 
-        # --- CUELLO CAMISERO & POLAR & BRAHAM ---
+        # --- BORREGOS ---
+        {"sku": "BOR-VCAR", "nombre_oficial": "Borrego Virgen del Carmen", "categoria": "Borregos", "cantidad": 12},
+        {"sku": "BOR-VFAT", "nombre_oficial": "Borrego Virgen de Fatima", "categoria": "Borregos", "cantidad": 20},
+        {"sku": "BOR-SMIG", "nombre_oficial": "Borrego San Miguel Arcangel", "categoria": "Borregos", "cantidad": 3},
+
+        # --- CUELLO CAMISERO, POLAR & BRAHAM ---
         {"sku": "CUE-CAM-CAF", "nombre_oficial": "Cuello Camisero - Café", "categoria": "Insumos", "cantidad": 1},
         {"sku": "CUE-CAM-BEI", "nombre_oficial": "Cuello Camisero - Beige", "categoria": "Insumos", "cantidad": 1},
         {"sku": "POL-DAM-VIN", "nombre_oficial": "Polar para Dama - Vinotinto", "categoria": "Polar", "cantidad": 12},
@@ -208,8 +210,9 @@ def importar_masivo():
         {"sku": "BRAH-RAI-NEG", "nombre_oficial": "Braham Bordado - Negro", "categoria": "Braham", "cantidad": 10},
         {"sku": "BRAH-RAI-CAF", "nombre_oficial": "Braham Bordado - Café", "categoria": "Braham", "cantidad": 1},
 
-        # --- PVC ---
+        # --- PVC (Con el de 1.5M incluido) ---
         {"sku": "PVC-1M", "nombre_oficial": "PVC 1 M", "categoria": "PVC", "cantidad": 112},
+        {"sku": "PVC-1.5M", "nombre_oficial": "PVC 1.5 M", "categoria": "PVC", "cantidad": 0},
         {"sku": "PVC-2M", "nombre_oficial": "PVC 2 M", "categoria": "PVC", "cantidad": 2},
         {"sku": "PVC-ROL-30M", "nombre_oficial": "Rollos PVC 30 M", "categoria": "PVC", "cantidad": 0},
         {"sku": "PVC-ROL-40M", "nombre_oficial": "Rollos PVC 40 M", "categoria": "PVC", "cantidad": 12},
@@ -242,7 +245,6 @@ def importar_masivo():
         {"sku": "INS-BOL-PEQ", "nombre_oficial": "Bolsas pequeñas 10*14", "categoria": "Empaques", "cantidad": 5}
     ]
     
-    # Esto actualiza o inserta los productos asegurando que la categoría quede correcta
     for p in productos_iniciales:
         inventario_col.update_one(
             {"sku": p["sku"]}, 
@@ -250,4 +252,4 @@ def importar_masivo():
             upsert=True
         )
         
-    return {"ok": True, "mensaje": "¡Categorías y productos sincronizados perfectamente en la nube!"}
+    return {"ok": True, "mensaje": "¡PVC de 1.5M agregado e inventario actualizado!"}
