@@ -139,3 +139,24 @@ def escanear_salida(data: EscaneoSalida):
         "ok": True, 
         "mensaje": f"Se descontó 1 de {producto['nombre_oficial']} (Quedan: {nuevo_stock})"
     }
+    @app.get("/api/guias")
+def obtener_guias():
+    try:
+        # Busca el documento de guías en Mongo
+        doc = db.guias_sync.find_one({"_id": "estado_global"})
+        return {"ok": True, "guias": doc.get("data", {}) if doc else {}}
+    except Exception as e:
+        return {"ok": False, "guias": {}}
+
+@app.post("/api/guias")
+def guardar_guias(guias_data: dict):
+    try:
+        # Guarda y sobreescribe las guías en Mongo
+        db.guias_sync.update_one(
+            {"_id": "estado_global"},
+            {"$set": {"data": guias_data}},
+            upsert=True
+        )
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False}
