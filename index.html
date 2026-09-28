@@ -840,16 +840,26 @@ async function processResult(code, raw) {
   box.classList.remove('ok','err');
   void box.offsetWidth;
 
+  // Si la guía no existe o no tiene contenido válido, lo detectamos de forma independiente por su número exacto o PDF
   if (!guias[code] || guias[code].contenido === 'Producto general' || !guias[code].contenido) {
-    let contenidoSugerido = "PVC 2 M";
-    if (code.startsWith("3639685475") || raw.includes("755")) {
-      contenidoSugerido = "PVC 2 M";
-    } else if (code.startsWith("3639685476") || raw.includes("756")) {
+    let contenidoSugerido = "PVC 2 M"; // por defecto
+    
+    // Distinción exacta según el número de guía (ej: la de 1 metro termina en .56.1 o similar)
+    if (code.includes("36396854756") || code.includes("4391")) {
       contenidoSugerido = "PVC 1 M";
+    } else if (code.includes("36396854755") || code.includes("4147")) {
+      contenidoSugerido = "PVC 2 M";
     } else if (code.startsWith("2400")) {
       contenidoSugerido = "Manteles 1,8 - 4 Puestos - Encanto";
     }
+    
     guias[code] = {destino:'', contenido: contenidoSugerido, estado:'pen', hora:timeNow()};
+  } else {
+    // Si la guía ya fue cargada por PDF, revisamos si su texto dice explícitamente 1 metro
+    let gActual = guias[code];
+    if (gActual.contenido && (gActual.contenido.toUpperCase().includes("1 METRO") || gActual.contenido.toUpperCase().includes("1 M"))) {
+      gActual.contenido = "PVC 1 M";
+    }
   }
 
   var g = guias[code];
