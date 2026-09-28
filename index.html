@@ -454,17 +454,6 @@ var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
 // --- DICCIONARIO DE COMBOS Y COLECCIONES ---
-const diccionarioSKUs = {
-    "GUADALUPE": "ABR-GUAD-01",
-    "MILAGROSA": "ABR-MILAGRO",
-    "DIVINO NIÑO": "ABR-DIV-NIN",
-    "ROSA MISTICA": "ABR-ROSA-01",
-    "SAN JOSE": "ABR-SAN-JOS",
-    "EDN": "eden",
-    "BRAHMAN": "ABR-BRAH-UNI"
-};
-
-// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
 const diccionarioNombres = {
     "GUADALUPE": "Abrigo Virgen Guadalupe",
     "MILAGROSA": "Abrigo Virgen de la Milagrosa",
@@ -815,9 +804,9 @@ async function processResult(code, raw) {
     // 1. Usamos el diccionario para extraer todos los productos del combo
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
-    // 2. Si no detectó combos, manda 1 producto de forma normal
+    // 2. Si no detectó combos, manda 1 producto de forma normal usando el texto que encuentre
     if (productosDetectados.length === 0) {
-        productosDetectados = [{ sku: contenidoGuia, cantidad: 1 }];
+        productosDetectados = [{ nombre_oficial: contenidoGuia, cantidad: 1 }];
     }
 
     let todoExito = true;
@@ -828,7 +817,7 @@ async function processResult(code, raw) {
     for (let i = 0; i < productosDetectados.length; i++) {
         let prod = productosDetectados[i];
         
-        // Si hay varios productos, modificamos ligeramente el código para evitar que backend bloquee duplicados
+        // Si hay varios productos, evitamos que se bloquee por guía duplicada
         let codigoEnvio = productosDetectados.length > 1 ? `${code}-${i+1}` : code;
 
         const res = await fetch(`${API_URL}/api/escanear_salida`, {
@@ -836,8 +825,8 @@ async function processResult(code, raw) {
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({
             codigo_guia: codigoEnvio,
-            nombre_producto: prod.sku,
-            cantidad_requerida: prod.cantidad,
+            nombre_producto: prod.nombre_oficial, 
+            cantidad_requerida: prod.cantidad,    
             usuario: usuario
           })
         });
@@ -851,7 +840,7 @@ async function processResult(code, raw) {
         }
     }
 
-    // 4. Mostramos notificación de éxito o error general
+    // 4. Mostramos notificación de éxito o error
     if (todoExito) {
       showToast('ok','✅','REVISADA Y DESCONTADA', code, msjExito, contenidoGuia);
       box.classList.add('ok'); feedback(true);
