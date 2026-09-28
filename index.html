@@ -453,7 +453,7 @@ var lastTime = 0;
 var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
-// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
+// --- DICCIONARIO ÚNICO DE COMBOS Y COLECCIONES ---
 const diccionarioNombres = {
     "GUADALUPE": "Abrigo Virgen Guadalupe",
     "MILAGROSA": "Abrigo Virgen de la Milagrosa",
@@ -462,123 +462,39 @@ const diccionarioNombres = {
     "SAN JOSE": "Abrigo San Jose",
     "EDN": "Manto Edn",
     "BRAHMAN": "Abrigo Brahmán Único",
-    "CARMEN": "Abrigo Virgen del Carmen Nuevo",
-    "MARIA AUXILIADORA": "Coleccion de Fe",
-    "DEL CARMEN": "Coleccion de Fe",
-    "DEVOCION": "Coleccion de Fe",
-    "TENDEDERO": "Tendedero 5 Metros",
-    "COLECCION DE FE": "Coleccion de Fe",
-    "ENVIO PRIORITARIO": "Envío Prioritario"
+    "CARMEN": "Abrigo Virgen del Carmen Nuevo"
 };
 
-// --- FUNCIÓN DE EXTRACCIÓN ROBUSTA (COMPATIBLE ID Y FORMATOS GENERALES) ---
+// --- FUNCIÓN ULTRA PRECISA PARA DETECTAR PRODUCTOS Y CANTIDADES ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
-    // 1. Detección específica para formato ID (Ej: * ID(2253078)Coleccion de Fe...)
-    let lineas = texto.split(/[\n\r|]+/);
-    for (let linea of lineas) {
-        if (linea.includes("ID(")) {
-            let nombreAsignado = "";
-            let cantidadItem = 1;
-
-            let matchCant = linea.match(/X\s*(\d+)\s*$/i);
-            if (matchCant && matchCant[1]) {
-                let p = parseInt(matchCant[1]);
-                if (p > 0 && p < 100) cantidadItem = p;
-            }
-
-            if (linea.includes("MARIA AUXILIADORA")) nombreAsignado = "Coleccion de Fe";
-            else if (linea.includes("DEL CARMEN") || linea.includes("CARMEN")) nombreAsignado = "Abrigo Virgen del Carmen Nuevo";
-            else if (linea.includes("GUADALUPE")) nombreAsignado = "Abrigo Virgen Guadalupe";
-            else if (linea.includes("MILAGROSA")) nombreAsignado = "Abrigo Virgen de la Milagrosa";
-            else if (linea.includes("DIVINO NIÑO")) nombreAsignado = "Abrigo Divino Niño";
-            else if (linea.includes("ROSA MISTICA")) nombreAsignado = "Abrigo Rosa Mistica";
-            else if (linea.includes("SAN JOSE")) nombreAsignado = "Abrigo San Jose";
-            else if (linea.includes("COLECCION DE FE")) nombreAsignado = "Coleccion de Fe";
-
-            if (nombreAsignado) {
-                let existente = productosADescontar.find(p => p.nombre_oficial === nombreAsignado);
-                if (existente) {
-                    existente.cantidad += cantidadItem;
-                } else {
-                    productosADescontar.push({ nombre_oficial: nombreAsignado, cantidad: cantidadItem });
-                }
-            }
-        }
-    }
-
-    if (productosADescontar.length > 0) {
-        return productosADescontar;
-    }
-
-    // 2. Detección exacta de PVC según tu base de datos
-    if (texto.includes("PROTECTOR PVC") || texto.includes("PVC")) {
-        let nombrePvcFinal = "PVC 2 M"; 
-        if (texto.includes("1 METRO") || texto.includes(" 1 ") || texto.includes("1.0") || texto.includes("1 M")) {
-            nombrePvcFinal = "PVC 1 M";
-        } else if (texto.includes("1.5") || texto.includes("1.50")) {
-            nombrePvcFinal = "PVC 1.5";
-        } else if (texto.includes("2 METROS") || texto.includes(" 2 ") || texto.includes("2.0") || texto.includes("2 M")) {
-            nombrePvcFinal = "PVC 2 M";
-        }
-
-        let cantidadPvc = 1;
-        let matchPvc = texto.match(/(?:X|CANT)[^\d]*?(\d+)/i);
-        if (matchPvc && matchPvc[1]) {
-            let p = parseInt(matchPvc[1]);
-            if (p > 0 && p < 100) cantidadPvc = p;
-        }
-
-        productosADescontar.push({ nombre_oficial: nombrePvcFinal, cantidad: cantidadPvc });
-    }
-
-    // 3. Detección exacta de Manteles
-    if (texto.includes("MANTEL") || texto.includes("TURCO")) {
-        let puestos = "1,8 - 4 Puestos"; 
-        if (texto.includes("6 PUESTOS") || texto.includes("6 PUESTO") || texto.includes("6M") || texto.includes("2,2")) {
-            puestos = "2,2 - 6 Puestos";
-        }
-
-        let dis = "Encanto"; 
-        if (texto.includes("ORO")) dis = "Oro";
-        else if (texto.includes("IMPERIAL")) dis = "Imperial";
-        else if (texto.includes("PLATEADO")) dis = "Plateado";
-        else if (texto.includes("FLORENZA")) dis = "Florenza";
-        else if (texto.includes("ROSA") || texto.includes("ROSA SERENA")) dis = "Rosa";
-
-        let cantidadMantel = 1;
-        let matchMantel = texto.match(/(?:X|CANT)[^\d]*?(\d+)/i);
-        if (matchMantel && matchMantel[1]) {
-            let p = parseInt(matchMantel[1]);
-            if (p > 0 && p < 100) cantidadMantel = p;
-        }
-
-        productosADescontar.push({ nombre_oficial: `Manteles ${puestos} - ${dis}`, cantidad: cantidadMantel });
-    }
-
-    // 4. Búsqueda general en diccionario para el resto de productos
     for (let palabraClave in diccionarioNombres) {
-        if (palabraClave !== "MARIA AUXILIADORA" && palabraClave !== "DEL CARMEN" && palabraClave !== "DEVOCION" && texto.includes(palabraClave)) {
-            let cantidad = 1; 
+        if (texto.includes(palabraClave)) {
+            let cantidad = 1; // Por defecto
+            
             let regexCantidad = new RegExp(palabraClave + "[^\\w]*?(?:X|CANT)[^\\d]*?(\\d+)", "i");
             let match = texto.match(regexCantidad);
 
-            if (!match) match = texto.match(/\bX\s*(\d+)\b/i);
+            if (!match) {
+                let regexGeneral = /\bX\s*(\d+)\b/i;
+                match = texto.match(regexGeneral);
+            }
 
             if (match && match[1]) {
                 let parsed = parseInt(match[1]);
-                if (parsed > 0 && parsed < 100) cantidad = parsed;
+                if (parsed > 0 && parsed < 100) {
+                    cantidad = parsed;
+                }
             }
 
-            let nombreFinal = diccionarioNombres[palabraClave];
-            if (!productosADescontar.some(p => p.nombre_oficial === nombreFinal)) {
-                productosADescontar.push({ nombre_oficial: nombreFinal, cantidad: cantidad });
-            }
+            productosADescontar.push({
+                nombre_oficial: diccionarioNombres[palabraClave], 
+                cantidad: cantidad 
+            });
         }
     }
-    
     return productosADescontar; 
 }
 
@@ -872,35 +788,27 @@ async function processResult(code, raw) {
   box.classList.remove('ok','err');
   void box.offsetWidth;
 
-  if (!guias[code] || guias[code].contenido === 'Producto general' || !guias[code].contenido) {
-    let contenidoSugerido = "Abrigo"; 
-    
-    if (code.includes("36396854756") || code.includes("4391")) {
-      contenidoSugerido = "PVC 1 M";
-    } else if (code.includes("36396854755") || code.includes("4147") || code.includes("6171")) {
-      contenidoSugerido = "PVC 2 M";
-    } else if (code.startsWith("2400")) {
-      contenidoSugerido = "Manteles 1,8 - 4 Puestos - Encanto";
+  if (guias[code]) {
+    var g = guias[code];
+    if (g.estado === 'rev') {
+      showToast('dup','⚠️','YA REVISADA', code, 'Escaneada a las '+g.hora, g.contenido||'');
+      box.classList.add('err'); feedback(false);
+      return;
+    } else {
+      g.estado = 'rev';
+      g.hora = timeNow();
+      saveData(); updateStats(); updateProgress(); renderList();
     }
-    
-    guias[code] = {destino:'', contenido: contenidoSugerido, estado:'pen', hora:timeNow()};
-  }
-
-  var g = guias[code];
-  if (g.estado === 'rev') {
-    showToast('dup','⚠️','YA REVISADA', code, 'Escaneada a las '+g.hora, g.contenido||'');
-    box.classList.add('err'); feedback(false);
-    return;
   } else {
-    g.estado = 'rev';
-    g.hora = timeNow();
+    guias[code] = {destino:'', contenido:'Producto general', estado:'rev', hora:timeNow()};
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
+  // --- LÓGICA DE DESCUENTO MULTIPLICADO ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
-    let contenidoGuia = g.contenido || "Abrigo";
-    
+    const contenidoGuia = guias[code].contenido || "Producto general";
+
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
     if (productosDetectados.length === 0) {
@@ -931,7 +839,7 @@ async function processResult(code, raw) {
             const data = await res.json();
             if (!res.ok || !data.ok) {
                 todoExito = false;
-                msjError = data.detail || 'No se pudo procesar la salida en nube';
+                msjError = data.detail || 'No se pudo procesar la salida';
             }
         }
         totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
@@ -1093,7 +1001,7 @@ function extractFromPDF(text) {
     }
 
     if (products.length === 0) {
-      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\vert{}Metros\vert{}Talla\vert{}Abrigo\vert{}Tendedero\vert{}Protector)[^$\n\r]{0,60})/gi;
+      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\Vert{}Metros\Vert{}Talla\Vert{}Abrigo\Vert{}Tendedero\Vert{}Protector)[^$\n\r]{0,60})/gi;
       while ((m = re3.exec(block)) !== null) {
         var prod2 = m[1]
           .replace(/^(PRODUCTO\s+CANT\s*[\n\r]*)/i,'')
