@@ -462,7 +462,10 @@ const diccionarioNombres = {
     "SAN JOSE": "Abrigo San Jose",
     "EDN": "Manto Edn",
     "BRAHMAN": "Abrigo Brahmán Único",
-    "CARMEN": "Abrigo Virgen del Carmen Nuevo"
+    "CARMEN": "Abrigo Virgen del Carmen Nuevo",
+    "TENDEDERO": "Tendedero 5 Metros",
+    "COLECCION DE FE": "Coleccion de Fe",
+    "ENVIO PRIORITARIO": "Envío Prioritario"
 };
 
 // --- FUNCIÓN ADAPTADA A LOS NOMBRES EXACTOS DE TU NUBE ---
@@ -508,13 +511,21 @@ function extraerProductosDeGuia(textoGuia) {
         else if (texto.includes("IMPERIAL")) dis = "Imperial";
         else if (texto.includes("PLATEADO")) dis = "Plateado";
         else if (texto.includes("FLORENZA")) dis = "Florenza";
-        else if (texto.includes("ROSA")) dis = "Rosa";
+        else if (texto.includes("ROSA") || texto.includes("ROSA SERENA")) dis = "Rosa";
 
         let nombreMantelFinal = `Manteles ${puestos} - ${dis}`;
 
+        let cantidadMantel = 1;
+        let regexMantelCant = /(?:X|CANT)[^\d]*?(\d+)/i;
+        let matchMantel = texto.match(regexMantelCant);
+        if (matchMantel && matchMantel[1]) {
+            let p = parseInt(matchMantel[1]);
+            if (p > 0 && p < 100) cantidadMantel = p;
+        }
+
         productosADescontar.push({
             nombre_oficial: nombreMantelFinal,
-            cantidad: 1 
+            cantidad: cantidadMantel
         });
     }
 
@@ -840,26 +851,18 @@ async function processResult(code, raw) {
   box.classList.remove('ok','err');
   void box.offsetWidth;
 
-  // Si la guía no existe o no tiene contenido válido, lo detectamos de forma independiente por su número exacto o PDF
   if (!guias[code] || guias[code].contenido === 'Producto general' || !guias[code].contenido) {
-    let contenidoSugerido = "PVC 2 M"; // por defecto
+    let contenidoSugerido = "Abrigo"; 
     
-    // Distinción exacta según el número de guía (ej: la de 1 metro termina en .56.1 o similar)
     if (code.includes("36396854756") || code.includes("4391")) {
       contenidoSugerido = "PVC 1 M";
-    } else if (code.includes("36396854755") || code.includes("4147")) {
+    } else if (code.includes("36396854755") || code.includes("4147") || code.includes("6171")) {
       contenidoSugerido = "PVC 2 M";
     } else if (code.startsWith("2400")) {
       contenidoSugerido = "Manteles 1,8 - 4 Puestos - Encanto";
     }
     
     guias[code] = {destino:'', contenido: contenidoSugerido, estado:'pen', hora:timeNow()};
-  } else {
-    // Si la guía ya fue cargada por PDF, revisamos si su texto dice explícitamente 1 metro
-    let gActual = guias[code];
-    if (gActual.contenido && (gActual.contenido.toUpperCase().includes("1 METRO") || gActual.contenido.toUpperCase().includes("1 M"))) {
-      gActual.contenido = "PVC 1 M";
-    }
   }
 
   var g = guias[code];
@@ -875,7 +878,7 @@ async function processResult(code, raw) {
 
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
-    let contenidoGuia = g.contenido || "PVC 2 M";
+    let contenidoGuia = g.contenido || "Abrigo";
     
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
@@ -1069,7 +1072,7 @@ function extractFromPDF(text) {
     }
 
     if (products.length === 0) {
-      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\Vert{}Metros\Vert{}Talla\Vert{}Abrigo\Vert{}Tendedero\Vert{}Protector)[^$\n\r]{0,60})/gi;
+      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\vert{}Metros\vert{}Talla\vert{}Abrigo\vert{}Tendedero\vert{}Protector)[^$\n\r]{0,60})/gi;
       while ((m = re3.exec(block)) !== null) {
         var prod2 = m[1]
           .replace(/^(PRODUCTO\s+CANT\s*[\n\r]*)/i,'')
