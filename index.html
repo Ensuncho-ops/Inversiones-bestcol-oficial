@@ -806,15 +806,15 @@ async function processResult(code, raw) {
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
-  // --- NUEVA LÓGICA DE SINCRONIZACIÓN CON DICCIONARIO ---
+  // --- NUEVA LÓGICA DE SINCRONIZACIÓN CON DICCIONARIO Y CANTIDADES ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
     const contenidoGuia = guias[code].contenido || "Producto general";
 
-    // 1. Usamos el diccionario para extraer todos los productos del combo
+    // 1. Detectamos los productos y sus cantidades usando el diccionario mejorado
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
-    // 2. Si no detectó combos, manda 1 producto de forma normal usando el texto que encuentre
+    // 2. Si no detectó ningún combo del diccionario, usa el texto general con cantidad 1
     if (productosDetectados.length === 0) {
         productosDetectados = [{ nombre_oficial: contenidoGuia, cantidad: 1 }];
     }
@@ -823,11 +823,10 @@ async function processResult(code, raw) {
     let msjError = "";
     let msjExito = "";
 
-    // 3. Descontamos CADA producto detectado iterando en la base de datos
+    // 3. Iteramos y enviamos la cantidad real detectada (ej: 2) al servidor
     for (let i = 0; i < productosDetectados.length; i++) {
         let prod = productosDetectados[i];
         
-        // Si hay varios productos, evitamos que se bloquee por guía duplicada
         let codigoEnvio = productosDetectados.length > 1 ? `${code}-${i+1}` : code;
 
         const res = await fetch(`${API_URL}/api/escanear_salida`, {
@@ -835,22 +834,22 @@ async function processResult(code, raw) {
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({
             codigo_guia: codigoEnvio,
-            nombre_producto: prod.nombre_oficial, 
-            cantidad_requerida: prod.cantidad,    
+            nombre_producto: prod.nombre_oficial,  // Envía el nombre limpio (ej: "Abrigo Virgen Guadalupe")
+            cantidad_requerida: prod.cantidad,     // Envía la cantidad exacta (ej: 2)
             usuario: usuario
           })
         });
         
         const data = await res.json();
         if (res.ok && data.ok) {
-            msjExito = data.mensaje || guias[code].destino || guias[code].hora;
+            msjExito = `Se descontaron ${prod.cantidad} de ${prod.nombre_oficial}`;
         } else {
             todoExito = false;
             msjError = data.detail || 'No se pudo procesar la salida';
         }
     }
 
-    // 4. Mostramos notificación de éxito o error
+    // 4. Mostramos la notificación con el resultado correcto
     if (todoExito) {
       showToast('ok','✅','REVISADA Y DESCONTADA', code, msjExito, contenidoGuia);
       box.classList.add('ok'); feedback(true);
@@ -863,7 +862,6 @@ async function processResult(code, raw) {
     box.classList.add('ok'); feedback(true);
   }
 }
-
 function showToast(type, icon, lbl, code, sub, prod) {
   var t = document.getElementById('toast');
   t.className = 'toast show '+type;
