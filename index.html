@@ -465,21 +465,21 @@ const diccionarioNombres = {
     "CARMEN": "Abrigo Virgen del Carmen Nuevo"
 };
 
-// --- FUNCIÓN INTELIGENTE PARA DETECTAR PVC (1M, 1.5M, 2M), MATELES Y MÁS ---
+// --- FUNCIÓN ADAPTADA A LOS NOMBRES EXACTOS DE TU NUBE ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
-    // 1. Detección precisa para Protectores PVC según los metros de la guía
+    // 1. Detección exacta de PVC según tu base de datos
     if (texto.includes("PROTECTOR PVC") || texto.includes("PVC")) {
-        let nombrePvcFinal = "Protector PVC para mesa NUEVO: 2 Metros x 1.50 Metros"; // por defecto
+        let nombrePvcFinal = "PVC 2 M"; // por defecto
         
-        if (texto.includes("1.5 METROS") || texto.includes("1.50 METROS") || texto.includes(" 1.5 ") || texto.includes(" 1.50 ")) {
-            nombrePvcFinal = "Protector PVC para mesa NUEVO: 1.5 Metros x 1.50 Metros";
-        } else if (texto.includes("1 METRO") || texto.includes(" 1 ") || texto.includes("1.0")) {
-            nombrePvcFinal = "Protector PVC para mesa NUEVO: 1 Metro x 1.50 Metros";
-        } else if (texto.includes("2 METROS") || texto.includes(" 2 ") || texto.includes("2.0")) {
-            nombrePvcFinal = "Protector PVC para mesa NUEVO: 2 Metros x 1.50 Metros";
+        if (texto.includes("1 METRO") || texto.includes(" 1 ") || texto.includes("1.0") || texto.includes("1 M")) {
+            nombrePvcFinal = "PVC 1 M";
+        } else if (texto.includes("1.5") || texto.includes("1.50")) {
+            nombrePvcFinal = "PVC 1.5";
+        } else if (texto.includes("2 METROS") || texto.includes(" 2 ") || texto.includes("2.0") || texto.includes("2 M")) {
+            nombrePvcFinal = "PVC 2 M";
         }
 
         let cantidadPvc = 1;
@@ -496,15 +496,21 @@ function extraerProductosDeGuia(textoGuia) {
         });
     }
 
-    // 2. Detección para Manteles (4 o 6 puestos)
+    // 2. Detección exacta de Manteles según tu base de datos (Puestos + Diseño)
     if (texto.includes("MANTEL") || texto.includes("TURCO")) {
-        let nombreMantelFinal = "Manteles Mesa de 4 Puestos"; 
-        
-        if (texto.includes("6 PUESTOS") || texto.includes("6 PUESTO") || texto.includes("6M")) {
-            nombreMantelFinal = "Manteles Mesa de 6 Puestos";
-        } else if (texto.includes("4 PUESTOS") || texto.includes("4 PUESTO") || texto.includes("4M")) {
-            nombreMantelFinal = "Manteles Mesa de 4 Puestos";
+        let puestos = "1,8 - 4 Puestos"; // por defecto
+        if (texto.includes("6 PUESTOS") || texto.includes("6 PUESTO") || texto.includes("6M") || texto.includes("2,2")) {
+            puestos = "2,2 - 6 Puestos";
         }
+
+        let dis = "Encanto"; // diseño por defecto
+        if (texto.includes("ORO")) dis = "Oro";
+        else if (texto.includes("IMPERIAL")) dis = "Imperial";
+        else if (texto.includes("PLATEADO")) dis = "Plateado";
+        else if (texto.includes("FLORENZA")) dis = "Florenza";
+        else if (texto.includes("ROSA")) dis = "Rosa";
+
+        let nombreMantelFinal = `Manteles ${puestos} - ${dis}`;
 
         productosADescontar.push({
             nombre_oficial: nombreMantelFinal,
