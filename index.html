@@ -820,52 +820,54 @@ async function processResult(code, raw) {
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
-  // --- NUEVA LÓGICA DE SINCRONIZACIÓN CON DICCIONARIO Y CANTIDADES ---
+  // --- NUEVA LÓGICA DE DESCUENTO MULTIPLICADO PARA FORZAR EL STOCK REAL ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
     const contenidoGuia = guias[code].contenido || "Producto general";
 
-    // 1. Detectamos los productos y sus cantidades usando el diccionario mejorado
+    // 1. Detectamos los productos y su cantidad exacta
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
-    // 2. Si no detectó ningún combo del diccionario, usa el texto general con cantidad 1
+    // 2. Si no detectó combos, usa el texto general con cantidad 1
     if (productosDetectados.length === 0) {
         productosDetectados = [{ nombre_oficial: contenidoGuia, cantidad: 1 }];
     }
 
     let todoExito = true;
     let msjError = "";
-    let msjExito = "";
+    let totalDescontadoTexto = "";
 
-    // 3. Iteramos y enviamos la cantidad real detectada (ej: 2) al servidor
+    // 3. Iteramos por cada producto detectado
     for (let i = 0; i < productosDetectados.length; i++) {
         let prod = productosDetectados[i];
         
-        let codigoEnvio = productosDetectados.length > 1 ? `${code}-${i+1}` : code;
+        // Forzamos el descuento repetido si la cantidad es mayor a 1 (ej: 2 abrigos = 2 peticiones de 1)
+        for (let c = 0; c < prod.cantidad; c++) {
+            let codigoEnvio = (productosDetectados.length > 1 || prod.cantidad > 1) ? `${code}-${i+1}-${c+1}` : code;
 
-        const res = await fetch(`${API_URL}/api/escanear_salida`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            codigo_guia: codigoEnvio,
-            nombre_producto: prod.nombre_oficial,  // Envía el nombre limpio (ej: "Abrigo Virgen Guadalupe")
-            cantidad_requerida: prod.cantidad,     // Envía la cantidad exacta (ej: 2)
-            usuario: usuario
-          })
-        });
-        
-        const data = await res.json();
-        if (res.ok && data.ok) {
-            msjExito = `Se descontaron ${prod.cantidad} de ${prod.nombre_oficial}`;
-        } else {
-            todoExito = false;
-            msjError = data.detail || 'No se pudo procesar la salida';
+            const res = await fetch(`${API_URL}/api/escanear_salida`, {
+              method: 'POST',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({
+                codigo_guia: codigoEnvio,
+                nombre_producto: prod.nombre_oficial,
+                cantidad_requerida: 1,
+                usuario: usuario
+              })
+            });
+            
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
+                todoExito = false;
+                msjError = data.detail || 'No se pudo procesar la salida';
+            }
         }
+        totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
     }
 
-    // 4. Mostramos la notificación con el resultado correcto
+    // 4. Mostramos la notificación del resultado
     if (todoExito) {
-      showToast('ok','✅','REVISADA Y DESCONTADA', code, msjExito, contenidoGuia);
+      showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
       box.classList.add('ok'); feedback(true);
     } else {
       showToast('no','❌','ERROR DE STOCK', code, msjError, contenidoGuia);
