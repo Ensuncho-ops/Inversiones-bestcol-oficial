@@ -465,14 +465,57 @@ const diccionarioNombres = {
     "CARMEN": "Abrigo Virgen del Carmen Nuevo"
 };
 
-// --- FUNCIÓN ULTRA PRECISA PARA DETECTAR PRODUCTOS Y CANTIDADES ---
+// --- FUNCIÓN INTELIGENTE PARA DETECTAR PVC (1M, 1.5M, 2M), MATELES Y MÁS ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
+    // 1. Detección precisa para Protectores PVC según los metros de la guía
+    if (texto.includes("PROTECTOR PVC") || texto.includes("PVC")) {
+        let nombrePvcFinal = "Protector PVC para mesa NUEVO: 2 Metros x 1.50 Metros"; // por defecto
+        
+        if (texto.includes("1.5 METROS") || texto.includes("1.50 METROS") || texto.includes(" 1.5 ") || texto.includes(" 1.50 ")) {
+            nombrePvcFinal = "Protector PVC para mesa NUEVO: 1.5 Metros x 1.50 Metros";
+        } else if (texto.includes("1 METRO") || texto.includes(" 1 ") || texto.includes("1.0")) {
+            nombrePvcFinal = "Protector PVC para mesa NUEVO: 1 Metro x 1.50 Metros";
+        } else if (texto.includes("2 METROS") || texto.includes(" 2 ") || texto.includes("2.0")) {
+            nombrePvcFinal = "Protector PVC para mesa NUEVO: 2 Metros x 1.50 Metros";
+        }
+
+        let cantidadPvc = 1;
+        let regexPvcCant = /(?:X|CANT)[^\d]*?(\d+)/i;
+        let matchPvc = texto.match(regexPvcCant);
+        if (matchPvc && matchPvc[1]) {
+            let p = parseInt(matchPvc[1]);
+            if (p > 0 && p < 100) cantidadPvc = p;
+        }
+
+        productosADescontar.push({
+            nombre_oficial: nombrePvcFinal,
+            cantidad: cantidadPvc
+        });
+    }
+
+    // 2. Detección para Manteles (4 o 6 puestos)
+    if (texto.includes("MANTEL") || texto.includes("TURCO")) {
+        let nombreMantelFinal = "Manteles Mesa de 4 Puestos"; 
+        
+        if (texto.includes("6 PUESTOS") || texto.includes("6 PUESTO") || texto.includes("6M")) {
+            nombreMantelFinal = "Manteles Mesa de 6 Puestos";
+        } else if (texto.includes("4 PUESTOS") || texto.includes("4 PUESTO") || texto.includes("4M")) {
+            nombreMantelFinal = "Manteles Mesa de 4 Puestos";
+        }
+
+        productosADescontar.push({
+            nombre_oficial: nombreMantelFinal,
+            cantidad: 1 
+        });
+    }
+
+    // 3. Detección para el resto de productos del diccionario
     for (let palabraClave in diccionarioNombres) {
         if (texto.includes(palabraClave)) {
-            let cantidad = 1; // Por defecto
+            let cantidad = 1; 
             
             let regexCantidad = new RegExp(palabraClave + "[^\\w]*?(?:X|CANT)[^\\d]*?(\\d+)", "i");
             let match = texto.match(regexCantidad);
@@ -489,15 +532,17 @@ function extraerProductosDeGuia(textoGuia) {
                 }
             }
 
-            productosADescontar.push({
-                nombre_oficial: diccionarioNombres[palabraClave], 
-                cantidad: cantidad 
-            });
+            if (!productosADescontar.some(p => p.nombre_oficial === diccionarioNombres[palabraClave])) {
+                productosADescontar.push({
+                    nombre_oficial: diccionarioNombres[palabraClave], 
+                    cantidad: cantidad 
+                });
+            }
         }
     }
+    
     return productosADescontar; 
 }
-
 // ═══ INIT & LOGIN ═══
 function init() {
   if (localStorage.getItem('gs_token')) {
