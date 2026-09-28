@@ -463,20 +463,59 @@ const diccionarioNombres = {
     "EDN": "Manto Edn",
     "BRAHMAN": "Abrigo Brahmán Único",
     "CARMEN": "Abrigo Virgen del Carmen Nuevo",
+    "MARIA AUXILIADORA": "Coleccion de Fe",
+    "DEL CARMEN": "Coleccion de Fe",
+    "DEVOCION": "Coleccion de Fe",
     "TENDEDERO": "Tendedero 5 Metros",
     "COLECCION DE FE": "Coleccion de Fe",
     "ENVIO PRIORITARIO": "Envío Prioritario"
 };
 
-// --- FUNCIÓN ADAPTADA A LOS NOMBRES EXACTOS DE TU NUBE ---
+// --- FUNCIÓN DE EXTRACCIÓN ROBUSTA (COMPATIBLE ID Y FORMATOS GENERALES) ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
-    // 1. Detección exacta de PVC según tu base de datos
+    // 1. Detección específica para formato ID (Ej: * ID(2253078)Coleccion de Fe...)
+    let lineas = texto.split(/[\n\r|]+/);
+    for (let linea of lineas) {
+        if (linea.includes("ID(")) {
+            let nombreAsignado = "";
+            let cantidadItem = 1;
+
+            let matchCant = linea.match(/X\s*(\d+)\s*$/i);
+            if (matchCant && matchCant[1]) {
+                let p = parseInt(matchCant[1]);
+                if (p > 0 && p < 100) cantidadItem = p;
+            }
+
+            if (linea.includes("MARIA AUXILIADORA")) nombreAsignado = "Coleccion de Fe";
+            else if (linea.includes("DEL CARMEN") || linea.includes("CARMEN")) nombreAsignado = "Abrigo Virgen del Carmen Nuevo";
+            else if (linea.includes("GUADALUPE")) nombreAsignado = "Abrigo Virgen Guadalupe";
+            else if (linea.includes("MILAGROSA")) nombreAsignado = "Abrigo Virgen de la Milagrosa";
+            else if (linea.includes("DIVINO NIÑO")) nombreAsignado = "Abrigo Divino Niño";
+            else if (linea.includes("ROSA MISTICA")) nombreAsignado = "Abrigo Rosa Mistica";
+            else if (linea.includes("SAN JOSE")) nombreAsignado = "Abrigo San Jose";
+            else if (linea.includes("COLECCION DE FE")) nombreAsignado = "Coleccion de Fe";
+
+            if (nombreAsignado) {
+                let existente = productosADescontar.find(p => p.nombre_oficial === nombreAsignado);
+                if (existente) {
+                    existente.cantidad += cantidadItem;
+                } else {
+                    productosADescontar.push({ nombre_oficial: nombreAsignado, cantidad: cantidadItem });
+                }
+            }
+        }
+    }
+
+    if (productosADescontar.length > 0) {
+        return productosADescontar;
+    }
+
+    // 2. Detección exacta de PVC según tu base de datos
     if (texto.includes("PROTECTOR PVC") || texto.includes("PVC")) {
-        let nombrePvcFinal = "PVC 2 M"; // por defecto
-        
+        let nombrePvcFinal = "PVC 2 M"; 
         if (texto.includes("1 METRO") || texto.includes(" 1 ") || texto.includes("1.0") || texto.includes("1 M")) {
             nombrePvcFinal = "PVC 1 M";
         } else if (texto.includes("1.5") || texto.includes("1.50")) {
@@ -486,74 +525,56 @@ function extraerProductosDeGuia(textoGuia) {
         }
 
         let cantidadPvc = 1;
-        let regexPvcCant = /(?:X|CANT)[^\d]*?(\d+)/i;
-        let matchPvc = texto.match(regexPvcCant);
+        let matchPvc = texto.match(/(?:X|CANT)[^\d]*?(\d+)/i);
         if (matchPvc && matchPvc[1]) {
             let p = parseInt(matchPvc[1]);
             if (p > 0 && p < 100) cantidadPvc = p;
         }
 
-        productosADescontar.push({
-            nombre_oficial: nombrePvcFinal,
-            cantidad: cantidadPvc
-        });
+        productosADescontar.push({ nombre_oficial: nombrePvcFinal, cantidad: cantidadPvc });
     }
 
-    // 2. Detección exacta de Manteles según tu base de datos (Puestos + Diseño)
+    // 3. Detección exacta de Manteles
     if (texto.includes("MANTEL") || texto.includes("TURCO")) {
-        let puestos = "1,8 - 4 Puestos"; // por defecto
+        let puestos = "1,8 - 4 Puestos"; 
         if (texto.includes("6 PUESTOS") || texto.includes("6 PUESTO") || texto.includes("6M") || texto.includes("2,2")) {
             puestos = "2,2 - 6 Puestos";
         }
 
-        let dis = "Encanto"; // diseño por defecto
+        let dis = "Encanto"; 
         if (texto.includes("ORO")) dis = "Oro";
         else if (texto.includes("IMPERIAL")) dis = "Imperial";
         else if (texto.includes("PLATEADO")) dis = "Plateado";
         else if (texto.includes("FLORENZA")) dis = "Florenza";
         else if (texto.includes("ROSA") || texto.includes("ROSA SERENA")) dis = "Rosa";
 
-        let nombreMantelFinal = `Manteles ${puestos} - ${dis}`;
-
         let cantidadMantel = 1;
-        let regexMantelCant = /(?:X|CANT)[^\d]*?(\d+)/i;
-        let matchMantel = texto.match(regexMantelCant);
+        let matchMantel = texto.match(/(?:X|CANT)[^\d]*?(\d+)/i);
         if (matchMantel && matchMantel[1]) {
             let p = parseInt(matchMantel[1]);
             if (p > 0 && p < 100) cantidadMantel = p;
         }
 
-        productosADescontar.push({
-            nombre_oficial: nombreMantelFinal,
-            cantidad: cantidadMantel
-        });
+        productosADescontar.push({ nombre_oficial: `Manteles ${puestos} - ${dis}`, cantidad: cantidadMantel });
     }
 
-    // 3. Detección para el resto de productos del diccionario
+    // 4. Búsqueda general en diccionario para el resto de productos
     for (let palabraClave in diccionarioNombres) {
-        if (texto.includes(palabraClave)) {
+        if (palabraClave !== "MARIA AUXILIADORA" && palabraClave !== "DEL CARMEN" && palabraClave !== "DEVOCION" && texto.includes(palabraClave)) {
             let cantidad = 1; 
-            
             let regexCantidad = new RegExp(palabraClave + "[^\\w]*?(?:X|CANT)[^\\d]*?(\\d+)", "i");
             let match = texto.match(regexCantidad);
 
-            if (!match) {
-                let regexGeneral = /\bX\s*(\d+)\b/i;
-                match = texto.match(regexGeneral);
-            }
+            if (!match) match = texto.match(/\bX\s*(\d+)\b/i);
 
             if (match && match[1]) {
                 let parsed = parseInt(match[1]);
-                if (parsed > 0 && parsed < 100) {
-                    cantidad = parsed;
-                }
+                if (parsed > 0 && parsed < 100) cantidad = parsed;
             }
 
-            if (!productosADescontar.some(p => p.nombre_oficial === diccionarioNombres[palabraClave])) {
-                productosADescontar.push({
-                    nombre_oficial: diccionarioNombres[palabraClave], 
-                    cantidad: cantidad 
-                });
+            let nombreFinal = diccionarioNombres[palabraClave];
+            if (!productosADescontar.some(p => p.nombre_oficial === nombreFinal)) {
+                productosADescontar.push({ nombre_oficial: nombreFinal, cantidad: cantidad });
             }
         }
     }
