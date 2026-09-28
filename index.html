@@ -453,7 +453,7 @@ var lastTime = 0;
 var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
-// --- DICCIONARIO ÚNICO DE COMBOS Y COLECCIONES ---
+// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
 const diccionarioNombres = {
     "GUADALUPE": "Abrigo Virgen Guadalupe",
     "MILAGROSA": "Abrigo Virgen de la Milagrosa",
@@ -549,6 +549,7 @@ function extraerProductosDeGuia(textoGuia) {
     
     return productosADescontar; 
 }
+
 // ═══ INIT & LOGIN ═══
 function init() {
   if (localStorage.getItem('gs_token')) {
@@ -839,9 +840,8 @@ async function processResult(code, raw) {
   box.classList.remove('ok','err');
   void box.offsetWidth;
 
-  // Si la guía no existe o dice "Producto general", le asignamos un producto inteligente basado en el código o texto guardado
   if (!guias[code] || guias[code].contenido === 'Producto general' || !guias[code].contenido) {
-    let contenidoSugerido = "PVC 2 M"; // por defecto
+    let contenidoSugerido = "PVC 2 M";
     if (code.startsWith("3639685475") || raw.includes("755")) {
       contenidoSugerido = "PVC 2 M";
     } else if (code.startsWith("3639685476") || raw.includes("756")) {
@@ -849,7 +849,6 @@ async function processResult(code, raw) {
     } else if (code.startsWith("2400")) {
       contenidoSugerido = "Manteles 1,8 - 4 Puestos - Encanto";
     }
-    
     guias[code] = {destino:'', contenido: contenidoSugerido, estado:'pen', hora:timeNow()};
   }
 
@@ -904,18 +903,6 @@ async function processResult(code, raw) {
         totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
     }
 
-    if (todoExito) {
-      showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
-      box.classList.add('ok'); feedback(true);
-    } else {
-      showToast('no','❌','ERROR DE STOCK', code, msjError, contenidoGuia);
-      box.classList.add('err'); feedback(false);
-    }
-  } catch(e) {
-    showToast('ok','✅','REVISADA', code, guias[code].destino||guias[code].hora, guias[code].contenido||'');
-    box.classList.add('ok'); feedback(true);
-  }
-}
     if (todoExito) {
       showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
       box.classList.add('ok'); feedback(true);
