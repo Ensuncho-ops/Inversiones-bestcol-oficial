@@ -453,21 +453,7 @@ var lastTime = 0;
 var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
-// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
-const diccionarioNombres = {
-    "GUADALUPE": "Abrigo Virgen Guadalupe",
-    "MILAGROSA": "Abrigo Virgen de la Milagrosa",
-    "DIVINO NIÑO": "Abrigo Divino Niño",
-    "ROSA MISTICA": "Abrigo Rosa Mistica",
-    "SAN JOSE": "Abrigo San Jose",
-    "EDN": "Manto Edn",
-    "BRAHMAN": "Abrigo Brahmán Único",
-    "CARMEN": "Abrigo Virgen del Carmen Nuevo"
-};
-
-
-}
-// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
+// --- DICCIONARIO ÚNICO DE COMBOS Y COLECCIONES ---
 const diccionarioNombres = {
     "GUADALUPE": "Abrigo Virgen Guadalupe",
     "MILAGROSA": "Abrigo Virgen de la Milagrosa",
@@ -488,13 +474,10 @@ function extraerProductosDeGuia(textoGuia) {
         if (texto.includes(palabraClave)) {
             let cantidad = 1; // Por defecto
             
-            // Buscamos de forma inteligente si hay un número de cantidad cerca de la palabra clave o al final
-            // Detecta formatos como: "X 2", "X2", "x2", "x 2"
             let regexCantidad = new RegExp(palabraClave + "[^\\w]*?(?:X|CANT)[^\\d]*?(\\d+)", "i");
             let match = texto.match(regexCantidad);
 
             if (!match) {
-                // Si no está pegado a la palabra clave, buscamos cualquier "X [número]" en todo el texto del producto
                 let regexGeneral = /\bX\s*(\d+)\b/i;
                 match = texto.match(regexGeneral);
             }
@@ -514,6 +497,7 @@ function extraerProductosDeGuia(textoGuia) {
     }
     return productosADescontar; 
 }
+
 // ═══ INIT & LOGIN ═══
 function init() {
   if (localStorage.getItem('gs_token')) {
@@ -820,15 +804,13 @@ async function processResult(code, raw) {
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
-  // --- NUEVA LÓGICA DE DESCUENTO MULTIPLICADO PARA FORZAR EL STOCK REAL ---
+  // --- LÓGICA DE DESCUENTO MULTIPLICADO ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
     const contenidoGuia = guias[code].contenido || "Producto general";
 
-    // 1. Detectamos los productos y su cantidad exacta
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
-    // 2. Si no detectó combos, usa el texto general con cantidad 1
     if (productosDetectados.length === 0) {
         productosDetectados = [{ nombre_oficial: contenidoGuia, cantidad: 1 }];
     }
@@ -837,11 +819,9 @@ async function processResult(code, raw) {
     let msjError = "";
     let totalDescontadoTexto = "";
 
-    // 3. Iteramos por cada producto detectado
     for (let i = 0; i < productosDetectados.length; i++) {
         let prod = productosDetectados[i];
         
-        // Forzamos el descuento repetido si la cantidad es mayor a 1 (ej: 2 abrigos = 2 peticiones de 1)
         for (let c = 0; c < prod.cantidad; c++) {
             let codigoEnvio = (productosDetectados.length > 1 || prod.cantidad > 1) ? `${code}-${i+1}-${c+1}` : code;
 
@@ -865,7 +845,6 @@ async function processResult(code, raw) {
         totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
     }
 
-    // 4. Mostramos la notificación del resultado
     if (todoExito) {
       showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
       box.classList.add('ok'); feedback(true);
@@ -878,6 +857,7 @@ async function processResult(code, raw) {
     box.classList.add('ok'); feedback(true);
   }
 }
+
 function showToast(type, icon, lbl, code, sub, prod) {
   var t = document.getElementById('toast');
   t.className = 'toast show '+type;
@@ -918,7 +898,7 @@ function beep(ok) {
   } catch(e){}
 }
 
-// ═══ PDF IMPORT DE GUÍAS (ORIGINAL COMPLETO) ═══
+// ═══ PDF IMPORT DE GUÍAS ═══
 function importPDF(e) {
   var file = e.target.files[0]; if (!file) return;
   e.target.value = '';
