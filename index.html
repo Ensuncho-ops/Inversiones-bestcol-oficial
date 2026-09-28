@@ -464,15 +464,37 @@ const diccionarioSKUs = {
     "BRAHMAN": "ABR-BRAH-UNI"
 };
 
+// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
+const diccionarioNombres = {
+    "GUADALUPE": "Abrigo Virgen Guadalupe",
+    "MILAGROSA": "Abrigo Virgen de la Milagrosa",
+    "DIVINO NIÑO": "Abrigo Divino Niño",
+    "ROSA MISTICA": "Abrigo Rosa Mistica",
+    "SAN JOSE": "Abrigo San Jose",
+    "EDN": "Manto Edn",
+    "BRAHMAN": "Abrigo Brahmán Único",
+    "CARMEN": "Abrigo Virgen del Carmen Nuevo"
+};
+
 // --- FUNCIÓN PARA DETECTAR PRODUCTOS EN EL TEXTO DE LA GUÍA ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
-    for (let palabraClave in diccionarioSKUs) {
+    
+    for (let palabraClave in diccionarioNombres) {
         if (texto.includes(palabraClave)) {
+            let cantidad = 1; // Por defecto es 1
+            
+            // Buscar si dice "X 2", "X 3" justo después del nombre de la campaña
+            let regex = new RegExp(palabraClave + "\\s*X\\s*(\\d+)", "i");
+            let match = texto.match(regex);
+            if (match && match[1]) {
+                cantidad = parseInt(match[1]);
+            }
+
             productosADescontar.push({
-                sku: diccionarioSKUs[palabraClave], // El código oficial a descontar en backend
-                cantidad: 1 
+                nombre_oficial: diccionarioNombres[palabraClave], 
+                cantidad: cantidad 
             });
         }
     }
