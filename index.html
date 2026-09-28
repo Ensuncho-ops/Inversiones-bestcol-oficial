@@ -453,6 +453,32 @@ var lastTime = 0;
 var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
+// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
+const diccionarioSKUs = {
+    "GUADALUPE": "ABR-GUAD-01",
+    "MILAGROSA": "ABR-MILAGRO",
+    "DIVINO NIÑO": "ABR-DIV-NIN",
+    "ROSA MISTICA": "ABR-ROSA-01",
+    "SAN JOSE": "ABR-SAN-JOS",
+    "EDN": "eden",
+    "BRAHMAN": "ABR-BRAH-UNI"
+};
+
+// --- FUNCIÓN PARA DETECTAR PRODUCTOS EN EL TEXTO DE LA GUÍA ---
+function extraerProductosDeGuia(textoGuia) {
+    let texto = (textoGuia || "").toUpperCase();
+    let productosADescontar = [];
+    for (let palabraClave in diccionarioSKUs) {
+        if (texto.includes(palabraClave)) {
+            productosADescontar.push({
+                sku: diccionarioSKUs[palabraClave], // El código oficial a descontar en backend
+                cantidad: 1 
+            });
+        }
+    }
+    return productosADescontar; 
+}
+
 // ═══ INIT & LOGIN ═══
 function init() {
   if (localStorage.getItem('gs_token')) {
@@ -759,25 +785,56 @@ async function processResult(code, raw) {
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
-  // Sincronización con backend de Python para descontar stock
+  // --- NUEVA LÓGICA DE SINCRONIZACIÓN CON DICCIONARIO ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
-    const res = await fetch(`${API_URL}/api/escanear_salida`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        codigo_guia: code,
-        nombre_producto: guias[code].contenido || "Producto general",
-        cantidad_requerida: 1,
-        usuario: usuario
-      })
-    });
-    const data = await res.json();
-    if (res.ok && data.ok) {
-      showToast('ok','✅','REVISADA Y DESCONTADA', code, data.mensaje || guias[code].destino||guias[code].hora, guias[code].contenido||'');
+    const contenidoGuia = guias[code].contenido || "Producto general";
+
+    // 1. Usamos el diccionario para extraer todos los productos del combo
+    let productosDetectados = extraerProductosDeGuia(contenidoGuia);
+
+    // 2. Si no detectó combos, manda 1 producto de forma normal
+    if (productosDetectados.length === 0) {
+        productosDetectados = [{ sku: contenidoGuia, cantidad: 1 }];
+    }
+
+    let todoExito = true;
+    let msjError = "";
+    let msjExito = "";
+
+    // 3. Descontamos CADA producto detectado iterando en la base de datos
+    for (let i = 0; i < productosDetectados.length; i++) {
+        let prod = productosDetectados[i];
+        
+        // Si hay varios productos, modificamos ligeramente el código para evitar que backend bloquee duplicados
+        let codigoEnvio = productosDetectados.length > 1 ? `${code}-${i+1}` : code;
+
+        const res = await fetch(`${API_URL}/api/escanear_salida`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            codigo_guia: codigoEnvio,
+            nombre_producto: prod.sku,
+            cantidad_requerida: prod.cantidad,
+            usuario: usuario
+          })
+        });
+        
+        const data = await res.json();
+        if (res.ok && data.ok) {
+            msjExito = data.mensaje || guias[code].destino || guias[code].hora;
+        } else {
+            todoExito = false;
+            msjError = data.detail || 'No se pudo procesar la salida';
+        }
+    }
+
+    // 4. Mostramos notificación de éxito o error general
+    if (todoExito) {
+      showToast('ok','✅','REVISADA Y DESCONTADA', code, msjExito, contenidoGuia);
       box.classList.add('ok'); feedback(true);
     } else {
-      showToast('no','❌','ERROR DE STOCK', code, data.detail || 'No se pudo procesar la salida', guias[code].contenido||'');
+      showToast('no','❌','ERROR DE STOCK', code, msjError, contenidoGuia);
       box.classList.add('err'); feedback(false);
     }
   } catch(e) {
@@ -929,7 +986,7 @@ function extractFromPDF(text) {
     }
 
     if (products.length === 0) {
-      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\vert{}Metros\vert{}Talla\vert{}Abrigo\vert{}Tendedero\vert{}Protector)[^$\n\r]{0,60})/gi;
+      var re3 = /([A-Za-záéíóúñÁÉÍÓÚÑ][^$\n\r]{10,80}(?:Medidas\Vert{}Metros\Vert{}Talla\Vert{}Abrigo\Vert{}Tendedero\Vert{}Protector)[^$\n\r]{0,60})/gi;
       while ((m = re3.exec(block)) !== null) {
         var prod2 = m[1]
           .replace(/^(PRODUCTO\s+CANT\s*[\n\r]*)/i,'')
@@ -1201,7 +1258,6 @@ function clearAll() {
   showNotif('🗑️ Borrado todo');
 }
 
-// ═══ PERSISTENCE ═══
 // ═══ PERSISTENCE ═══
 function saveData() { 
   try { localStorage.setItem('gs6', JSON.stringify(guias)); } catch(e) {} 
