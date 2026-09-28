@@ -465,29 +465,44 @@ const diccionarioNombres = {
     "CARMEN": "Abrigo Virgen del Carmen Nuevo"
 };
 
-// --- FUNCIÓN PARA DETECTAR PRODUCTOS EN EL TEXTO DE LA GUÍA (MEJORADA) ---
+
+}
+// --- DICCIONARIO DE COMBOS Y COLECCIONES ---
+const diccionarioNombres = {
+    "GUADALUPE": "Abrigo Virgen Guadalupe",
+    "MILAGROSA": "Abrigo Virgen de la Milagrosa",
+    "DIVINO NIÑO": "Abrigo Divino Niño",
+    "ROSA MISTICA": "Abrigo Rosa Mistica",
+    "SAN JOSE": "Abrigo San Jose",
+    "EDN": "Manto Edn",
+    "BRAHMAN": "Abrigo Brahmán Único",
+    "CARMEN": "Abrigo Virgen del Carmen Nuevo"
+};
+
+// --- FUNCIÓN ULTRA PRECISA PARA DETECTAR PRODUCTOS Y CANTIDADES ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
     for (let palabraClave in diccionarioNombres) {
         if (texto.includes(palabraClave)) {
-            let cantidad = 1; // Por defecto es 1
+            let cantidad = 1; // Por defecto
             
-            // Expresión regular flexible para buscar "X 2", "X2", "x 2" en cualquier parte del bloque de la palabra
-            let regex = new RegExp(palabraClave + "[^\\d]*?X\\s*(\\d+)", "i");
-            let match = texto.match(regex);
-            
-            // Si no lo encuentra así, intenta buscar un formato general de cantidad al final
+            // Buscamos de forma inteligente si hay un número de cantidad cerca de la palabra clave o al final
+            // Detecta formatos como: "X 2", "X2", "x2", "x 2"
+            let regexCantidad = new RegExp(palabraClave + "[^\\w]*?(?:X|CANT)[^\\d]*?(\\d+)", "i");
+            let match = texto.match(regexCantidad);
+
             if (!match) {
-                let regexGeneral = new RegExp("X\\s*(\\d+)", "i");
+                // Si no está pegado a la palabra clave, buscamos cualquier "X [número]" en todo el texto del producto
+                let regexGeneral = /\bX\s*(\d+)\b/i;
                 match = texto.match(regexGeneral);
             }
 
             if (match && match[1]) {
-                let parsedQty = parseInt(match[1]);
-                if (parsedQty > 0 && parsedQty < 50) { // Validación para evitar números extraños
-                    cantidad = parsedQty;
+                let parsed = parseInt(match[1]);
+                if (parsed > 0 && parsed < 100) {
+                    cantidad = parsed;
                 }
             }
 
@@ -499,7 +514,6 @@ function extraerProductosDeGuia(textoGuia) {
     }
     return productosADescontar; 
 }
-
 // ═══ INIT & LOGIN ═══
 function init() {
   if (localStorage.getItem('gs_token')) {
