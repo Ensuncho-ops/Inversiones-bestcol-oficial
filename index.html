@@ -465,7 +465,7 @@ const diccionarioNombres = {
     "CARMEN": "Abrigo Virgen del Carmen Nuevo"
 };
 
-// --- FUNCIÓN PARA DETECTAR PRODUCTOS EN EL TEXTO DE LA GUÍA ---
+// --- FUNCIÓN PARA DETECTAR PRODUCTOS EN EL TEXTO DE LA GUÍA (MEJORADA) ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
@@ -474,11 +474,21 @@ function extraerProductosDeGuia(textoGuia) {
         if (texto.includes(palabraClave)) {
             let cantidad = 1; // Por defecto es 1
             
-            // Buscar si dice "X 2", "X 3" justo después del nombre de la campaña
-            let regex = new RegExp(palabraClave + "\\s*X\\s*(\\d+)", "i");
+            // Expresión regular flexible para buscar "X 2", "X2", "x 2" en cualquier parte del bloque de la palabra
+            let regex = new RegExp(palabraClave + "[^\\d]*?X\\s*(\\d+)", "i");
             let match = texto.match(regex);
+            
+            // Si no lo encuentra así, intenta buscar un formato general de cantidad al final
+            if (!match) {
+                let regexGeneral = new RegExp("X\\s*(\\d+)", "i");
+                match = texto.match(regexGeneral);
+            }
+
             if (match && match[1]) {
-                cantidad = parseInt(match[1]);
+                let parsedQty = parseInt(match[1]);
+                if (parsedQty > 0 && parsedQty < 50) { // Validación para evitar números extraños
+                    cantidad = parsedQty;
+                }
             }
 
             productosADescontar.push({
