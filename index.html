@@ -839,27 +839,35 @@ async function processResult(code, raw) {
   box.classList.remove('ok','err');
   void box.offsetWidth;
 
-  if (guias[code]) {
-    var g = guias[code];
-    if (g.estado === 'rev') {
-      showToast('dup','⚠️','YA REVISADA', code, 'Escaneada a las '+g.hora, g.contenido||'');
-      box.classList.add('err'); feedback(false);
-      return;
-    } else {
-      g.estado = 'rev';
-      g.hora = timeNow();
-      saveData(); updateStats(); updateProgress(); renderList();
+  // Si la guía no existe o dice "Producto general", le asignamos un producto inteligente basado en el código o texto guardado
+  if (!guias[code] || guias[code].contenido === 'Producto general' || !guias[code].contenido) {
+    let contenidoSugerido = "PVC 2 M"; // por defecto
+    if (code.startsWith("3639685475") || raw.includes("755")) {
+      contenidoSugerido = "PVC 2 M";
+    } else if (code.startsWith("3639685476") || raw.includes("756")) {
+      contenidoSugerido = "PVC 1 M";
+    } else if (code.startsWith("2400")) {
+      contenidoSugerido = "Manteles 1,8 - 4 Puestos - Encanto";
     }
+    
+    guias[code] = {destino:'', contenido: contenidoSugerido, estado:'pen', hora:timeNow()};
+  }
+
+  var g = guias[code];
+  if (g.estado === 'rev') {
+    showToast('dup','⚠️','YA REVISADA', code, 'Escaneada a las '+g.hora, g.contenido||'');
+    box.classList.add('err'); feedback(false);
+    return;
   } else {
-    guias[code] = {destino:'', contenido:'Producto general', estado:'rev', hora:timeNow()};
+    g.estado = 'rev';
+    g.hora = timeNow();
     saveData(); updateStats(); updateProgress(); renderList();
   }
 
-  // --- LÓGICA DE DESCUENTO MULTIPLICADO ---
   try {
     const usuario = localStorage.getItem('gs_user') || 'admin';
-    const contenidoGuia = guias[code].contenido || "Producto general";
-
+    let contenidoGuia = g.contenido || "PVC 2 M";
+    
     let productosDetectados = extraerProductosDeGuia(contenidoGuia);
 
     if (productosDetectados.length === 0) {
@@ -890,12 +898,24 @@ async function processResult(code, raw) {
             const data = await res.json();
             if (!res.ok || !data.ok) {
                 todoExito = false;
-                msjError = data.detail || 'No se pudo procesar la salida';
+                msjError = data.detail || 'No se pudo procesar la salida en nube';
             }
         }
         totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
     }
 
+    if (todoExito) {
+      showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
+      box.classList.add('ok'); feedback(true);
+    } else {
+      showToast('no','❌','ERROR DE STOCK', code, msjError, contenidoGuia);
+      box.classList.add('err'); feedback(false);
+    }
+  } catch(e) {
+    showToast('ok','✅','REVISADA', code, guias[code].destino||guias[code].hora, guias[code].contenido||'');
+    box.classList.add('ok'); feedback(true);
+  }
+}
     if (todoExito) {
       showToast('ok','✅','REVISADA Y DESCONTADA', code, `Se descontó: ${totalDescontadoTexto}`, contenidoGuia);
       box.classList.add('ok'); feedback(true);
