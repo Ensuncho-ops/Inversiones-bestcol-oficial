@@ -700,6 +700,13 @@ function renderInventarioFiltered() {
     return;
   }
 
+  // NUEVO: Guardar en la memoria qué acordeones están abiertos antes de redibujar
+  const categoriasAbiertas = new Set();
+  document.querySelectorAll('#invList .cat-group[open]').forEach(det => {
+    const catText = det.querySelector('summary span').textContent.replace('📂 ', '').trim();
+    categoriasAbiertas.add(catText);
+  });
+
   // 1. Agrupar productos por categoría
   const grupos = {};
   filtrados.forEach(p => {
@@ -708,14 +715,14 @@ function renderInventarioFiltered() {
     grupos[c].push(p);
   });
 
-  // 2. Renderizar acordeones (collapsables)
+  // 2. Renderizar acordeones
   let html = '';
   for (let cat in grupos) {
-    // Si se selecciona una categoría específica o alertas, que inicie abierto. Si es "TODOS", inicia cerrado.
-    const abierto = (currentInvCat !== 'TODOS') ? 'open' : '';
+    // NUEVO: Abre la carpeta si hay un filtro aplicado, O si estaba abierta antes de actualizar
+    const debeEstarAbierto = (currentInvCat !== 'TODOS' || categoriasAbiertas.has(cat)) ? 'open' : '';
     
     html += `
-      <details class="cat-group" ${abierto}>
+      <details class="cat-group" ${debeEstarAbierto}>
         <summary>
           <span>📂 ${cat}</span>
           <span style="font-size:12px; color:var(--txm)">${grupos[cat].length} ítems ▾</span>
