@@ -684,7 +684,6 @@ function filterInv(cat) {
   });
   renderInventarioFiltered();
 }
-
 function renderInventarioFiltered() {
   const el = document.getElementById('invList');
   let filtrados = globalInventario;
@@ -700,7 +699,7 @@ function renderInventarioFiltered() {
     return;
   }
 
-  // Guardar en la memoria qué acordeones están abiertos antes de redibujar
+  // NUEVO: Guardar en la memoria qué acordeones están abiertos antes de redibujar
   const categoriasAbiertas = new Set();
   document.querySelectorAll('#invList .cat-group[open]').forEach(det => {
     const catText = det.querySelector('summary span').textContent.replace('📂 ', '').trim();
@@ -718,6 +717,7 @@ function renderInventarioFiltered() {
   // 2. Renderizar acordeones
   let html = '';
   for (let cat in grupos) {
+    // NUEVO: Abre la carpeta si hay un filtro aplicado, O si estaba abierta antes de actualizar
     const debeEstarAbierto = (currentInvCat !== 'TODOS' || categoriasAbiertas.has(cat)) ? 'open' : '';
     
     html += `
@@ -741,8 +741,8 @@ function renderInventarioFiltered() {
             <div class="gdest">SKU: ${p.sku} ${low ? '• <b style="color:var(--rd)">¡Stock Crítico!</b>' : ''}</div>
           </div>
           <div class="stock-controls">
-            <!-- SE AGREGÓ "this" AL FINAL DEL ONCHANGE PARA IDENTIFICAR EL RECUADRO -->
-            <input type="number" class="edit-stock-inp" style="color: ${colorCantidad}" value="${p.cantidad}" onchange="fijarStockExacto('${p.sku}', this.value, this)" />
+            <!-- INPUT DIRECTO DE CANTIDAD -->
+            <input type="number" class="edit-stock-inp" style="color: ${colorCantidad}" value="${p.cantidad}" onchange="fijarStockExacto('${p.sku}', this.value)" />
             <button class="gdel" onclick="eliminarProducto('${p.sku}')">🗑️</button>
           </div>
         </div>
