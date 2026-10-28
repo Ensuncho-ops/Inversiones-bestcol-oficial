@@ -39,7 +39,11 @@ class ProductoNuevo(BaseModel):
 class ProductoActualizar(BaseModel):
     sku: str
     cambio: int
-
+    
+class ProductoFijar(BaseModel):
+    sku: str
+    cantidad: int
+    
 class ProductoEliminar(BaseModel):
     sku: str
 
@@ -71,6 +75,11 @@ def get_inventario():
     # Obtener todos los productos (excluyendo el ObjectId de Mongo)
     items = list(inventario_col.find({}, {"_id": 0}))
     return {"ok": True, "inventario": items}
+
+@app.post("/api/inventario/fijar")
+def fijar_stock(data: ProductoFijar):
+    res = inventario_col.update_one({"sku": data.sku}, {"$set": {"cantidad": data.cantidad}})
+    return {"ok": True}
 
 @app.post("/api/inventario/crear")
 def crear_producto(data: ProductoNuevo):
