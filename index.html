@@ -187,6 +187,44 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 
 input[type=file]{display:none}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
+
+  /* ACORDEONES Y EDICIÓN DE STOCK */
+.cat-group { background: var(--sur); border: 1px solid var(--bor); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+.cat-group summary { padding: 14px 16px; font-size: 14px; font-weight: 600; color: var(--tx); cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; background: var(--sur2); touch-action: manipulation; }
+.cat-group summary::-webkit-details-marker { display: none; }
+.cat-content { padding: 8px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+.gi { margin-bottom: 0; } 
+
+/* DISEÑO PREMIUM PARA EL INPUT DE STOCK */
+.edit-stock-inp { 
+  width: 60px !important; 
+  height: 36px !important; 
+  background: rgba(255, 255, 255, 0.06) !important; 
+  border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+  border-radius: 8px !important; 
+  padding: 0 !important; 
+  font-size: 16px !important; 
+  font-weight: 700 !important; 
+  text-align: center !important; 
+  outline: none; 
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.edit-stock-inp:focus { 
+  border-color: var(--ac) !important; 
+  background: rgba(0, 229, 255, 0.05) !important; 
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3), inset 0 2px 4px rgba(0,0,0,0.2);
+}
+.edit-stock-inp::-webkit-outer-spin-button,
+.edit-stock-inp::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.edit-stock-inp[type=number] {
+  -moz-appearance: textfield;
+}
+  
 </style>
 </head>
 <body>
