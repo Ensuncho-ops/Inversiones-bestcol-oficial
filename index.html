@@ -823,26 +823,26 @@ async function processResult(code, raw) {
     for (let i = 0; i < productosDetectados.length; i++) {
         let prod = productosDetectados[i];
         
-        for (let c = 0; c < prod.cantidad; c++) {
-            let codigoEnvio = (productosDetectados.length > 1 || prod.cantidad > 1) ? `${code}-${i+1}-${c+1}` : code;
+        let codigoEnvio = (productosDetectados.length > 1 || prod.cantidad > 1) ? `${code}-${i+1}` : code;
 
-            const res = await fetch(`${API_URL}/api/escanear_salida`, {
-              method: 'POST',
-              headers: {'Content-Type':'application/json'},
-              body: JSON.stringify({
-                codigo_guia: codigoEnvio,
-                nombre_producto: prod.nombre_oficial,
-                cantidad_requerida: 1,
-                usuario: usuario
-              })
-            });
-            
-            const data = await res.json();
-            if (!res.ok || !data.ok) {
-                todoExito = false;
-                msjError = data.detail || 'No se pudo procesar la salida';
-            }
+        // Se envía un SOLO request con la cantidad total real
+        const res = await fetch(`${API_URL}/api/escanear_salida`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            codigo_guia: codigoEnvio,
+            nombre_producto: prod.nombre_oficial,
+            cantidad_requerida: prod.cantidad, // Toma el número exacto, ej: 2
+            usuario: usuario
+          })
+        });
+        
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+            todoExito = false;
+            msjError = data.detail || 'No se pudo procesar la salida';
         }
+        
         totalDescontadoTexto += `${prod.cantidad} de ${prod.nombre_oficial} `;
     }
 
