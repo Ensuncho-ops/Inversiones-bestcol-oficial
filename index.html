@@ -612,24 +612,80 @@ function renderInventarioFiltered() {
     return;
   }
 
-  el.innerHTML = filtrados.map(p => {
-    let low = esBajoStock(p);
-    return `
-      <div class="gi ${low ? 'low-stock' : 'rev'}">
-        <div class="gico">${low ? '⚠️' : '📦'}</div>
-        <div class="ginf">
-          <div class="gnum">${p.nombre_oficial}</div>
-          <div class="gdest">SKU: ${p.sku} | Cat: ${p.categoria} ${low ? '• <b>¡Stock Crítico!</b>' : ''}</div>
-        </div>
-        <div style="font-size:15px;font-weight:bold;color:${p.cantidad>0?(low?'var(--yw)':'var(--gr)'):'var(--rd)'};margin:0 10px">${p.cantidad}</div>
-        <div class="stock-controls">
-          <button class="s-btn" onclick="cambiarStock('${p.sku}', -1)">-</button>
-          <button class="s-btn" onclick="cambiarStock('${p.sku}', 1)">+</button>
-          <button class="gdel" onclick="eliminarProducto('${p.sku}')">🗑️</button>
-        </div>
-      </div>
+  // 1. Agrupar productos por categoría
+  const grupos = {};
+  filtrados.forEach(p => {
+    const c = p.categoria || 'General';
+    if (!grupos[c]) grupos[c] = [];
+    grupos[c].push(p);
+  });
+
+  // 2. Renderizar acordeones (collapsables)
+  let html = '';
+  for (let cat in grupos) {
+    // Si se selecciona una categoría específica o alertas, que inicie abierto. Si es "TODOS", inicia cerrado.
+    const abierto = (currentInvCat !== 'TODOS') ? 'open' : '';
+    
+    html += `
+      <details class="cat-group" ${abierto}>
+        <summary>
+          <span>📂 ${cat}</span>
+          <span style="font-size:12px; color:var(--txm)">${grupos[cat].length} ítems ▾</span>
+        </summary>
+        <div class="cat-content">
     `;
-  }).join('');
+    
+    html += grupos[cat].map(p => {
+      let low = esBajoStock(p);
+      let colorCantidad = p.cantidad > 0 ? (low ? 'var(--yw)' : 'var(--gr)') : 'var(--rd)';
+      
+      return `
+        <div class="gi ${low ? 'low-stock' : 'rev'}">
+          <div class="gico">${low ? '⚠️' : '📦'}</div>
+          <div class="ginf">
+            <div class="gnum">${p.nombre_oficial}</div>
+            <div class="gdest">SKU: ${p.sku} ${low ? '• <b style="color:var(--rd)">¡Stock Crítico!</b>' : ''}</div>
+          </div>
+          <div class="stock-controls">
+            <!-- INPUT DIRECTO DE CANTIDAD -->
+            <input type="number" class="edit-stock-inp" style="color: ${colorCantidad}" value="${p.cantidad}" onchange="fijarStockExacto('${p.sku}', this.value)" />
+            <button class="gdel" onclick="eliminarProducto('${p.sku}')">🗑️</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    html += `</div></details>`;
+  }
+  
+  el.innerHTML = html;
+}
+
+// NUEVA FUNCIÓN: Guarda el número exacto digitado en el input
+async function fijarStockExacto(sku, valor) {
+  const nuevaCantidad = parseInt(valor);
+  if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
+    alert('Por favor ingresa un número válido.');
+    loadInventario(); // Recarga la vista para restaurar el número original
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/api/inventario/fijar`, {
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ sku: sku, cantidad: nuevaCantidad })
+    });
+    
+    if (res.ok) {
+      // Recarga silenciosamente los datos para mantener todo sincronizado
+      loadInventario();
+    } else {
+      alert('Hubo un error al actualizar el stock.');
+    }
+  } catch(e) {
+    alert('Error de conexión con el servidor.');
+  }
 }
 
 function openModalProd() { document.getElementById('modalProd').style.display = 'flex'; }
