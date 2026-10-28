@@ -754,13 +754,11 @@ function renderInventarioFiltered() {
   
   el.innerHTML = html;
 }
-
-// NUEVA FUNCIÓN: Guarda silenciosamente y hace brillar el recuadro en verde
+// FUNCIÓN DEFINITIVA: Actualiza en la nube sin tocar para nada el HTML ni cerrar acordeones
 async function fijarStockExacto(sku, valor, inputElement) {
   const nuevaCantidad = parseInt(valor);
   if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
     alert('Por favor ingresa un número válido.');
-    loadInventario(); 
     return;
   }
   
@@ -772,16 +770,15 @@ async function fijarStockExacto(sku, valor, inputElement) {
     });
     
     if (res.ok) {
-      // 1. Actualizamos la memoria local para no tener que descargar todo y evitar el parpadeo
+      // 1. Actualizamos únicamente el dato en memoria local (sin recargar listas)
       let prod = globalInventario.find(p => p.sku === sku);
       if (prod) prod.cantidad = nuevaCantidad;
       
-      // 2. Efecto visual premium: el borde alumbra verde confirmando que guardó en la nube
+      // 2. Efecto visual de éxito: el recuadro destella en verde por un segundo
       if(inputElement) {
           inputElement.style.borderColor = 'var(--gr)';
           inputElement.style.boxShadow = '0 0 12px rgba(0,214,143,0.5), inset 0 2px 4px rgba(0,0,0,0.2)';
           
-          // Regresa a la normalidad después de 1 segundo
           setTimeout(() => {
               inputElement.style.borderColor = '';
               inputElement.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.2)';
@@ -789,7 +786,6 @@ async function fijarStockExacto(sku, valor, inputElement) {
       }
     } else {
       alert('Hubo un error al actualizar el stock.');
-      loadInventario();
     }
   } catch(e) {
     alert('Error de conexión con el servidor.');
