@@ -118,17 +118,24 @@ def escanear_salida(data: EscaneoSalida):
     # 1. Limpieza Inteligente y extracción de cantidad
     nombre_sucio = data.nombre_producto
     
-    import re
-    # Buscamos el multiplicador (ej. "X 2", "x3") en todo el texto original
-    match_cant = re.search(r'[xX]\s*(\d+)', nombre_sucio)
-    cantidad_a_descontar = int(match_cant.group(1)) if match_cant else 1
-
-    # Limpiamos el nombre para buscar el producto en la base de datos
-    nombre_limpio = nombre_sucio.split("Notas:")[0].split("Nro:")[0].split("ID")[0].split("X")[0].strip()
+    # NUEVO: Prioridad a la cantidad que mandó el frontend
+    cantidad_a_descontar = data.cantidad_requerida
     
-    # Extraemos solo las primeras palabras clave por si está escrito distinto
+    import re
+    # ORIGINAL INTACTO (Plan de respaldo por si el frontend falla)
+    match_cant = re.search(r'[xX]\s*(\d+)', nombre_sucio)
+    if match_cant and int(match_cant.group(1)) > cantidad_a_descontar:
+        cantidad_a_descontar = int(match_cant.group(1))
+
+    # Tu misma limpieza de texto exacta (le añadí un split("x") minúscula por seguridad)
+    nombre_limpio = nombre_sucio.split("Notas:")[0].split("Nro:")[0].split("ID")[0].split("X")[0].split("x")[0].strip()
+    
+    # Extraemos solo las primeras palabras clave
     palabras = nombre_limpio.split()[:3] 
-    busqueda_flexible = ".*".join(palabras) # Ej: "Abrigo.*Virgen.*Guadalupe"
+    busqueda_flexible = ".*".join(palabras) 
+
+    # 2. Buscar en MongoDB ...
+    # (DE AQUÍ PARA ABAJO TODO TU CÓDIGO DE PYTHON QUEDA EXACTAMENTE IGUAL)
 
     # 2. Buscar en MongoDB ($regex = búsqueda parcial, $options: "i" = ignora mayúsculas)
     producto = inventario_col.find_one({"nombre_oficial": {"$regex": nombre_limpio, "$options": "i"}})
