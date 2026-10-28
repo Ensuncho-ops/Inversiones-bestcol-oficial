@@ -155,7 +155,13 @@ def escanear_salida(data: EscaneoSalida):
     if not producto:
         raise HTTPException(status_code=400, detail=f"No se halló en la nube: '{nombre_limpio}'")
         
-    # 3. Descontar Stock
+    # 3. Validar y Descontar Stock
+    if producto["cantidad"] < cantidad_a_descontar:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Stock insuficiente para '{producto['nombre_oficial']}'. Hay {producto['cantidad']} y la guía pide {cantidad_a_descontar}."
+        )
+        
     nuevo_stock = producto["cantidad"] - cantidad_a_descontar
     inventario_col.update_one({"_id": producto["_id"]}, {"$set": {"cantidad": nuevo_stock}})
     
