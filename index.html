@@ -521,40 +521,27 @@ var lastTime = 0;
 var DEBOUNCE = 3000;
 const API_URL = "https://inversiones-bestcol-oficial.onrender.com";
 
-// --- FUNCIÓN DINÁMICA DE DETECCIÓN (SIN DICCIONARIO) ---
-function extraerProductosDeGuia(textoGuia) {
-    let texto = (textoGuia || "");
-    let productosADescontar = [];
+// --- DICCIONARIO INTELIGENTE (SOPORTA COMBOS) ---
+const diccionarioNombres = {
+    "GUADALUPE": "Abrigo Virgen Guadalupe",
+    "MILAGROSA": "Abrigo Virgen de la Milagrosa",
+    "DIVINO NIÑO": "Abrigo Divino Niño",
+    "ROSA MISTICA": "Abrigo Rosa Mistica",
+    "SAN JOSE": "Abrigo San Jose",
+    "EDN": "Manto Edn",
+    "BRAHMAN": "Abrigo Brahmán Único",
+    "CARMEN": "Abrigo Virgen del Carmen Nuevo",
+    "MADRE CELESTIAL": "Manto Madre Celestial",
+    "CABALLISTA": "Abrigo 100% Caballista",
+    "NAVIDAD EN FAMILIA": "Pie de Arbol Navidad en Familia"
+};
 
-    // Tu lector de PDF separa múltiples productos con " | "
-    let partes = texto.split(" | ");
-
-    for (let parte of partes) {
-        let cantidad = 1; // 1 por defecto
-
-        // Detecta dinámicamente cantidades como "X 2", "x3" o "CANT 5"
-        let regexCantidad = /(?:X|CANT)\s*(\d+)/i;
-        let match = parte.match(regexCantidad);
-
-        if (match && match[1]) {
-            let parsed = parseInt(match[1]);
-            if (parsed > 0 && parsed < 100) cantidad = parsed;
-        }
-
-        // Enviamos el texto crudo a Python para que él haga el "Match" con MongoDB
-        productosADescontar.push({
-            nombre_oficial: parte.trim(),
-            cantidad: cantidad
-        });
-    }
-    return productosADescontar; 
-}
-
-// --- FUNCIÓN ULTRA PRECISA PARA DETECTAR PRODUCTOS Y CANTIDADES ---
+// --- FUNCIÓN RESTAURADA Y MEJORADA ---
 function extraerProductosDeGuia(textoGuia) {
     let texto = (textoGuia || "").toUpperCase();
     let productosADescontar = [];
     
+    // 1. Busca múltiples productos en la misma frase (Ideal para COMBOS)
     for (let palabraClave in diccionarioNombres) {
         if (texto.includes(palabraClave)) {
             let cantidad = 1; // Por defecto
@@ -580,6 +567,23 @@ function extraerProductosDeGuia(textoGuia) {
             });
         }
     }
+    
+    // 2. PLAN B (Automático): Si no encontró nada en el diccionario, intenta mandarlo crudo
+    if (productosADescontar.length === 0 && texto.trim() !== "") {
+        let partes = texto.split(" | ");
+        for (let parte of partes) {
+            let cantidad = 1;
+            let regexCantidad = /(?:X|CANT)\s*(\d+)/i;
+            let match = parte.match(regexCantidad);
+            if (match && match[1]) cantidad = parseInt(match[1]);
+            
+            let nombreLimpio = parte.replace(/(?:X|CANT)\s*\d+/i, '').trim();
+            if (nombreLimpio) {
+                productosADescontar.push({ nombre_oficial: nombreLimpio, cantidad: cantidad });
+            }
+        }
+    }
+
     return productosADescontar; 
 }
 
