@@ -700,7 +700,7 @@ function renderInventarioFiltered() {
     return;
   }
 
-  // NUEVO: Guardar en la memoria qué acordeones están abiertos antes de redibujar
+  // Guardar en la memoria qué acordeones están abiertos antes de redibujar
   const categoriasAbiertas = new Set();
   document.querySelectorAll('#invList .cat-group[open]').forEach(det => {
     const catText = det.querySelector('summary span').textContent.replace('📂 ', '').trim();
@@ -718,7 +718,6 @@ function renderInventarioFiltered() {
   // 2. Renderizar acordeones
   let html = '';
   for (let cat in grupos) {
-    // NUEVO: Abre la carpeta si hay un filtro aplicado, O si estaba abierta antes de actualizar
     const debeEstarAbierto = (currentInvCat !== 'TODOS' || categoriasAbiertas.has(cat)) ? 'open' : '';
     
     html += `
@@ -742,8 +741,8 @@ function renderInventarioFiltered() {
             <div class="gdest">SKU: ${p.sku} ${low ? '• <b style="color:var(--rd)">¡Stock Crítico!</b>' : ''}</div>
           </div>
           <div class="stock-controls">
-            <!-- INPUT DIRECTO DE CANTIDAD -->
-            <input type="number" class="edit-stock-inp" style="color: ${colorCantidad}" value="${p.cantidad}" onchange="fijarStockExacto('${p.sku}', this.value)" />
+            <!-- SE AGREGÓ "this" AL FINAL DEL ONCHANGE PARA IDENTIFICAR EL RECUADRO -->
+            <input type="number" class="edit-stock-inp" style="color: ${colorCantidad}" value="${p.cantidad}" onchange="fijarStockExacto('${p.sku}', this.value, this)" />
             <button class="gdel" onclick="eliminarProducto('${p.sku}')">🗑️</button>
           </div>
         </div>
@@ -754,6 +753,47 @@ function renderInventarioFiltered() {
   }
   
   el.innerHTML = html;
+}
+
+// NUEVA FUNCIÓN: Guarda silenciosamente y hace brillar el recuadro en verde
+async function fijarStockExacto(sku, valor, inputElement) {
+  const nuevaCantidad = parseInt(valor);
+  if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
+    alert('Por favor ingresa un número válido.');
+    loadInventario(); 
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/api/inventario/fijar`, {
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ sku: sku, cantidad: nuevaCantidad })
+    });
+    
+    if (res.ok) {
+      // 1. Actualizamos la memoria local para no tener que descargar todo y evitar el parpadeo
+      let prod = globalInventario.find(p => p.sku === sku);
+      if (prod) prod.cantidad = nuevaCantidad;
+      
+      // 2. Efecto visual premium: el borde alumbra verde confirmando que guardó en la nube
+      if(inputElement) {
+          inputElement.style.borderColor = 'var(--gr)';
+          inputElement.style.boxShadow = '0 0 12px rgba(0,214,143,0.5), inset 0 2px 4px rgba(0,0,0,0.2)';
+          
+          // Regresa a la normalidad después de 1 segundo
+          setTimeout(() => {
+              inputElement.style.borderColor = '';
+              inputElement.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.2)';
+          }, 1000);
+      }
+    } else {
+      alert('Hubo un error al actualizar el stock.');
+      loadInventario();
+    }
+  } catch(e) {
+    alert('Error de conexión con el servidor.');
+  }
 }
 
 // NUEVA FUNCIÓN: Guarda el número exacto digitado en el input
